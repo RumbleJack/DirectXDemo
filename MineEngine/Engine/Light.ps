@@ -1,0 +1,84 @@
+////////////////////////////////////////////////////////////////////////////////
+// 文件名: light.ps
+////////////////////////////////////////////////////////////////////////////////
+
+//////////////
+// 全局变量 //
+//////////////
+Texture2D shaderTexture;
+SamplerState SampleType;
+cbuffer LightBuffer
+{
+    float4 ambientColor;
+    float4 diffuseColor;
+    float3 lightDirection;
+    float  specularPower;
+    float4 specularColor;
+};
+
+
+//////////////
+// 类型定义 //
+//////////////
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+    float2 tex : TEXCOORD0;
+    float3 normal : NORMAL;
+    float3 viewDirection : TEXCOORD1;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+// 像素着色器
+////////////////////////////////////////////////////////////////////////////////
+float4 LightPixelShader(PixelInputType input) : SV_TARGET
+{
+    float4 textureColor;
+    float3 lightDir;
+    float lightIntensity;
+    float4 color;
+
+	float3 reflection;
+    float4 specular;
+
+    // 使用采样器，从纹理贴图中采样当前纹理坐标位置的像素颜色
+    textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+	// 设置每个像素的默认输出颜色为环境光值
+    color = ambientColor;
+
+	
+    // Initialize the specular color.
+    specular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	 // 将光照方向取反，以备后续计算
+    lightDir = -lightDirection;
+    // 计算每个像素的光量
+    lightIntensity = saturate(dot(input.normal, lightDir));
+	
+	// 根据光强度相和漫反射颜色，确定最终的漫反射颜色。saturate返回0~1之间的值，从而避免为负数的directly lighting
+    //color += saturate(diffuseColor * lightIntensity);
+
+	  if(lightIntensity > 0.0f)
+    {
+        // Determine the final diffuse color based on the diffuse color and the amount of light intensity.
+        color += (diffuseColor * lightIntensity);
+
+        // Saturate the ambient and diffuse color.
+        color = saturate(color);
+		 // Calculate the reflection vector based on the light intensity, normal vector, and light direction.
+        reflection = normalize(2 * lightIntensity * input.normal - lightDir); 
+		 // Determine the amount of specular light based on the reflection vector, viewing direction, and specular power.
+        specular = pow(saturate(dot(reflection, input.viewDirection)), specularPower);
+	}
+
+    // 将纹理像素和最终漫反射颜色相乘，得到最终的像素颜色(为了提升亮度，添加一个红色分量)
+	color = saturate(color * textureColor );
+
+	 // Add the specular component last to the output color.
+    color = saturate(color + specular);
+
+    return color;
+}
+

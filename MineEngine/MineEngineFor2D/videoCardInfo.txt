@@ -1,0 +1,2 @@
+videoCardName          NVIDIA GeForce GTX 1060 6GB
+videoCardMemory(MB)          6061

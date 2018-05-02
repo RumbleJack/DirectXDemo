@@ -1,0 +1,64 @@
+////////////////////////////////////////////////////////////////////////////////
+// Filename: systemclass.h
+////////////////////////////////////////////////////////////////////////////////
+#pragma once
+
+///////////////////////////////
+// PRE-PROCESSING DIRECTIVES //
+///////////////////////////////
+//加速编译过程，通过排除一些不常用的API来减小Win32头文件的大小
+#define WIN32_LEAN_AND_MEAN
+
+//////////////
+// INCLUDES //
+//////////////
+#include <windows.h>
+
+///////////////////////
+// MY CLASS INCLUDES //
+///////////////////////
+#include "inputclass.h"
+#include "graphicsclass.h"
+
+////////////////////////////////////////////////////////////////////////////////
+// Class name: SystemClass
+////////////////////////////////////////////////////////////////////////////////
+class SystemClass
+{
+public:
+	SystemClass();
+	SystemClass(const SystemClass&);
+	~SystemClass();
+
+	bool Initialize();
+	void Shutdown();
+	void Run();
+
+	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+
+private:
+	bool Frame();
+	void InitializeWindows(int&, int&);
+	void ShutdownWindows();
+
+private:
+	LPCWSTR m_applicationName;
+	HINSTANCE m_hinstance;
+	HWND m_hwnd;
+
+	InputClass* m_Input;
+	GraphicsClass* m_Graphics;
+};
+
+
+/////////////////////////
+// FUNCTION PROTOTYPES //
+/////////////////////////
+static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+
+
+/////////////
+// GLOBALS //
+/////////////
+static SystemClass* ApplicationHandle = nullptr;
+
