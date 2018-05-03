@@ -324,7 +324,7 @@ bool GraphicsClass::Render()
 	Render3D();
 
 	// 绘制二维图形
-	//Render2D();
+	Render2D();
 
 	// 将绘制场景显示到屏幕
 	m_Direct3D->EndScene();
@@ -530,7 +530,15 @@ bool GraphicsClass::Render3D_3()
 
 bool GraphicsClass::RenderScanData()
 {
+	m_Direct3D->TurnZBufferOff();
+
+	XMMATRIX worldMatrix, viewMatrix, orthoMatrix;;
 	bool result;
+
+	// 取得世界，观察和投影矩阵
+	m_Direct3D->GetWorldMatrix(worldMatrix);
+	m_Camera->GetViewMatrix(viewMatrix);
+	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
 	// 根据输入A扫描数据构造点
 	const int	 AScanVertexSize = 3000;
@@ -563,11 +571,12 @@ bool GraphicsClass::RenderScanData()
 	result = m_AScanLine->Render(m_Direct3D->GetDeviceContext(), LineClass::LINE_STRIP);
 	if (!result)
 		return false;
-	//result = m_LineShader->Render(m_Direct3D->GetDeviceContext(),
-	//	m_AScanLine->GetIndexCount(),
-	//	m_basicWorldMatrix, m_basicViewMatrix, m_orthoProjectMatrix, m_AScanLine->GetColor());
+	result = m_LineShader->Render(m_Direct3D->GetDeviceContext(),
+		m_AScanLine->GetIndexCount(),
+		worldMatrix, viewMatrix, orthoMatrix, m_AScanLine->GetColor());
 	if (!result)
 		return false;
+	m_Direct3D->TurnZBufferOn();
 	return true;
 }
 
@@ -633,6 +642,7 @@ STRUCT_ASCAN_DATA * GraphicsClass::GetAndLockAScanData()
 
 bool GraphicsClass::Render2D()
 {
+	RenderScanData();
 	XMMATRIX worldMatrix, viewMatrix, orthoMatrix;;
 	bool result;
 
@@ -645,13 +655,13 @@ bool GraphicsClass::Render2D()
 	// 绘制2D图形前，关闭Z-Buffer（关闭z-buffer后，后绘制的图形在前，先绘制的图形在后；而开启z-buffer，z坐标小的在前，z坐标大的在后）
 	m_Direct3D->TurnZBufferOff();
 	// 将二维图像顶点和索引缓存放入图形管道，准备绘制
-	result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), 300, 300);
-	if (!result)
-		return false;
-	// 使用纹理着色器绘制二维图像
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap->GetTexture());
-	if (!result)
-		return false;
+	//result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), 300, 300);
+	//if (!result)
+	//	return false;
+	//// 使用纹理着色器绘制二维图像
+	//result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap->GetTexture());
+	//if (!result)
+	//	return false;
 	// 绘制2D图形后，开启Z-Buffer
 	m_Direct3D->TurnZBufferOn();
 
