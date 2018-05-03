@@ -8,6 +8,20 @@ using namespace std;
 
 #define PI 3.1415
 
+struct STRUCT_ASCAN_DATA
+{
+	void Init()
+	{
+		Data = NULL;
+		DataSize = 0;
+		SoundDataRange = 0;
+	}
+	// 一维数组，其数值为波幅
+	short* Data;
+	// 数组大小
+	long  DataSize;
+	long SoundDataRange;
+};
 GraphicsClass::GraphicsClass()
 {
 	m_Direct3D = nullptr;
@@ -34,6 +48,8 @@ GraphicsClass::~GraphicsClass()
 
 bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 {
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
 	bool result;
 
 	// 创建D3DClass对象
@@ -175,11 +191,42 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	//初始化设备输入结构体
 	m_inputDeviceState = new InputDeviceState;
 
+	m_LineShader = new LineShaderClass;
+	if (!m_LineShader)
+		return false;
+	result = m_LineShader->Initialize(m_Direct3D->GetDevice(), hwnd);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the Line shader object.", L"Error", MB_OK);
+		return false;
+	}
+	m_AScanLine = new LineClass;
+	if (!m_AScanLine)
+		return false;
+	result = m_AScanLine->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(),
+		screenWidth, screenHeight);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the  Line  shader object.", L"Error", MB_OK);
+		return false;
+	}
 	return true;
 }
 
 void GraphicsClass::Shutdown()
 {
+	if (m_AScanLine)
+	{
+		m_AScanLine->Shutdown();
+		delete m_AScanLine;
+		m_AScanLine = 0;
+	}
+	if (m_LineShader)
+	{
+		m_LineShader->Shutdown();
+		delete m_LineShader;
+		m_LineShader = 0;
+	}
 
 	// 释放输入状态指针
 	delete m_inputDeviceState;
@@ -481,6 +528,109 @@ bool GraphicsClass::Render3D_3()
 	return true;
 }
 
+bool GraphicsClass::RenderScanData()
+{
+	bool result;
+
+	// 根据输入A扫描数据构造点
+	const int	 AScanVertexSize = 3000;
+	int			 renderSize = 0;
+	static float AScanVertexBuffer[AScanVertexSize * 2];
+
+	// 构造A扫曲线绘制区域
+	LONG left = -m_screenWidth / 2 ;
+	LONG top = m_screenHeight / 2 ;
+	LONG right = m_screenWidth / 2 ;
+	LONG bottom = -m_screenHeight / 2 ;
+	RECT renderPos = { left, top, right,bottom };
+
+	// 取得A扫描数据
+	const STRUCT_ASCAN_DATA * pAScanData = GetAndLockAScanData();
+	if (pAScanData == NULL) {
+		return true;
+	}
+	result = InitAScanVertexData(pAScanData, AScanVertexBuffer, renderSize);
+	if (!result)
+		return false;
+
+	// 更新并绘制A扫描曲线
+	result = m_AScanLine->UpdateBuffers(m_Direct3D->GetDeviceContext(), renderPos, AScanVertexBuffer, renderSize);
+	if (!result)
+		return false;
+	result = m_AScanLine->UpdateColor(1.0f, 1.0f, 0.0f);
+	if (!result)
+		return false;
+	result = m_AScanLine->Render(m_Direct3D->GetDeviceContext(), LineClass::LINE_STRIP);
+	if (!result)
+		return false;
+	//result = m_LineShader->Render(m_Direct3D->GetDeviceContext(),
+	//	m_AScanLine->GetIndexCount(),
+	//	m_basicWorldMatrix, m_basicViewMatrix, m_orthoProjectMatrix, m_AScanLine->GetColor());
+	if (!result)
+		return false;
+	return true;
+}
+
+bool GraphicsClass::InitAScanVertexData(const STRUCT_ASCAN_DATA * pAScanData, float * AScanVertexBuffer, int & renderSize)
+{
+	long dataSize = pAScanData->DataSize;
+	const short* AScanData = pAScanData->Data;
+	long AScanDataRange = pAScanData->SoundDataRange;
+
+	long intvBegin = 0;
+	long intvWidth = 100;
+	if (dataSize > 3000)
+	{
+		return false;
+	}
+	// 每毫米对应A扫描数据点数
+	float sampleRate = static_cast<float>(dataSize) / AScanDataRange;
+	// 将要绘制在屏幕上的数据起始、终止坐标
+	int offsetAScanDataIndex = static_cast<int>(sampleRate * intvBegin);
+	int endAScanDataIndex = min(static_cast<int>(sampleRate * (intvBegin + intvWidth)), dataSize);
+
+	// 屏幕对多对应A扫描点个数
+	int screenWidth = static_cast<int>(sampleRate * intvWidth);
+	// 构造绘制数据顶点
+	for (int AScanDataIndex = offsetAScanDataIndex; AScanDataIndex < endAScanDataIndex; AScanDataIndex++)
+	{
+		AScanVertexBuffer[2 * (AScanDataIndex - offsetAScanDataIndex)]
+			= static_cast<float>((AScanDataIndex - offsetAScanDataIndex)) / screenWidth;
+		AScanVertexBuffer[2 * (AScanDataIndex - offsetAScanDataIndex) + 1]
+			= static_cast<float>(AScanData[AScanDataIndex]) / 512;
+	}
+
+	renderSize = endAScanDataIndex - offsetAScanDataIndex;
+	return true;
+}
+
+STRUCT_ASCAN_DATA * GraphicsClass::GetAndLockAScanData()
+{
+	const int AScanVertexSize = 30;
+	short * AScanDataBuff = new short[AScanVertexSize];
+
+	static STRUCT_ASCAN_DATA *backBufer = new STRUCT_ASCAN_DATA;
+	static STRUCT_ASCAN_DATA *frontBufer = new STRUCT_ASCAN_DATA;
+
+	// 构造每一帧的数据
+	static float offset = 0;
+	offset += 0.01f;
+	for (int i = 0; i < AScanVertexSize; i++) {
+		AScanDataBuff[i] = static_cast<short>(512.0f * abs(
+			sin(static_cast<float>(i) * (2 * static_cast<float>(PI) / AScanVertexSize) + offset)
+		));
+	}
+
+	// 显示前缓冲
+	backBufer->Data = static_cast<short*>(AScanDataBuff);
+	backBufer->DataSize = AScanVertexSize;
+	backBufer->SoundDataRange = 120;
+
+	// 交换前后缓冲、并显示前缓冲
+	swap(backBufer, frontBufer);
+	return frontBufer;
+}
+
 bool GraphicsClass::Render2D()
 {
 	XMMATRIX worldMatrix, viewMatrix, orthoMatrix;;
@@ -581,3 +731,4 @@ bool GraphicsClass::AdjustCameraParameter()
 
 	return true;
 }
+

@@ -155,6 +155,8 @@
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="Lightshaderclass.cpp" />
+    <ClCompile Include="LineClass.cpp" />
+    <ClCompile Include="LineShaderClass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modelclass.cpp" />
     <ClCompile Include="positionclass.cpp" />
@@ -183,6 +185,8 @@
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="Lightclass.h" />
     <ClInclude Include="Lightshaderclass.h" />
+    <ClInclude Include="LineClass.h" />
+    <ClInclude Include="LineShaderClass.h" />
     <ClInclude Include="modelclass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
@@ -201,6 +205,8 @@
     <None Include="..\Engine\font.vs" />
     <None Include="..\Engine\Light.ps" />
     <None Include="..\Engine\light.vs" />
+    <None Include="..\Engine\Line.ps" />
+    <None Include="..\Engine\Line.vs" />
     <None Include="..\Engine\texture.ps" />
     <None Include="..\Engine\texture.vs" />
     <None Include="ClassDiagram.cd" />

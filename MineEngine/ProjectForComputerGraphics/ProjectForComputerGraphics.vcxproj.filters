@@ -93,6 +93,12 @@
     <ClCompile Include="applicationclass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="LineShaderClass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LineClass.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Bitmapclass.h">
@@ -170,6 +176,12 @@
     <ClInclude Include="header.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="LineClass.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LineShaderClass.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Engine\texture.ps">
@@ -192,5 +204,11 @@
     </None>
     <None Include="ClassDiagram.cd" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="..\Engine\Line.ps">
+      <Filter>着色器</Filter>
+    </None>
+    <None Include="..\Engine\Line.vs">
+      <Filter>着色器</Filter>
+    </None>
   </ItemGroup>
 </Project>

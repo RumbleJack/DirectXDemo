@@ -17,7 +17,11 @@
 #include "lightclass.h"
 #include "header.h"
 
+#include "LineClass.h"
+#include "LineShaderClass.h"
 // 类名: GraphicsClass
+
+struct STRUCT_ASCAN_DATA;
 class GraphicsClass
 {
 private:
@@ -28,6 +32,7 @@ private:
 		int mouseDeltaX;
 		int mouseDeltaY;
 	};
+
 public:
 	GraphicsClass();
 	GraphicsClass(const GraphicsClass&);
@@ -48,7 +53,9 @@ private:
 	bool Render3D_1();
 	bool Render3D_2();
 	bool Render3D_3();
-
+	bool RenderScanData();
+	bool InitAScanVertexData(const STRUCT_ASCAN_DATA* pAScanData, float * AScanVertexBuffer, int& renderSize);
+	STRUCT_ASCAN_DATA* GetAndLockAScanData();
 	bool AdjustCameraParameter();
 
 	bool outputVideoCardInfo();
@@ -71,4 +78,10 @@ private:
 	// 记录输入设备状态（包括键盘和鼠标）
 	InputDeviceState * m_inputDeviceState;
 
+	// A扫描曲线
+	LineClass*			m_AScanLine;
+	LineShaderClass   * m_LineShader;
+
+	// 屏幕尺寸
+	int m_screenWidth, m_screenHeight;
 };

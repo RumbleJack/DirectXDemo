@@ -1,0 +1,22 @@
+////////////////////////////////////////////////////////////////////////////////
+// 文件名: texture.ps
+////////////////////////////////////////////////////////////////////////////////
+// 像素着色器常量缓冲
+cbuffer PixelBuffer
+{
+    float4 pixelColor;
+};
+
+// 像素着色器输入
+struct PixelInputType
+{
+    float4 position : SV_POSITION;
+};
+
+float4 TexturePixelShader(PixelInputType input) : SV_TARGET
+{
+	float4 LineColor;
+	LineColor = pixelColor;
+
+    return LineColor;
+}

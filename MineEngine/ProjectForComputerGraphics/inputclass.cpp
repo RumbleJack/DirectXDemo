@@ -45,10 +45,10 @@ bool InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int
 	if (FAILED(result))
 		return false;
 	
-	// Set the cooperative level of the keyboard to not share with other programs.
-	result = m_keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
-	if(FAILED(result))
-		return false;
+	//// Set the cooperative level of the keyboard to not share with other programs.
+	//result = m_keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_EXCLUSIVE);
+	//if(FAILED(result))
+	//	return false;
 
 	// 获取键盘
 	result = m_keyboard->Acquire();
@@ -65,12 +65,12 @@ bool InputClass::Initialize(HINSTANCE hinstance, HWND hwnd, int screenWidth, int
 	if(FAILED(result))
 		return false;
 
-	// Set the cooperative level of the mouse to share with other programs.
-	result = m_mouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-	if(FAILED(result))
-	{
-		return false;
-	}
+	//// Set the cooperative level of the mouse to share with other programs.
+	//result = m_mouse->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
+	//if(FAILED(result))
+	//{
+	//	return false;
+	//}
 
 	// 获取鼠标
 	result = m_mouse->Acquire();
