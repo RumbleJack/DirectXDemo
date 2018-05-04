@@ -30,12 +30,15 @@ D3DClass::~D3DClass()
 bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen,
 	float screenDepth, float screenNear)
 {
-	// 记录是否与显示器同步设置
+	// 记录垂直同步设置、屏幕尺寸
 	m_vsync_enabled = vsync;
+	m_screenWidth = screenWidth;
+	m_screenHeight = screenHeight;
+	m_hwnd = hwnd;
 
 	// 取得刷新频率的分子和分母
 	UINT	numerator, denominator;
-	if (!Initialize_RefreshRate(screenWidth, screenHeight, numerator, denominator))
+	if (!Initialize_RefreshRate( numerator, denominator))
 		return false;
 
 	// 初始化设备和交换链
@@ -51,7 +54,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 
 	//  初始化深度模板状态
-	if (!Initialize_depthStencilState())
+	if (!Initialize_DepthStencilState())
 		return false;
 
 	//  初始化深度模板视图
@@ -63,11 +66,11 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 
 	// 初始化光栅器视点
-	if (!Initialize_Viewport(screenWidth,  screenHeight))
+	if (!Initialize_Viewport())
 		return false;
 
 	// 初始化矩阵
-	if (!Initialize_Matrix( screenWidth,  screenHeight,  screenDepth,  screenNear))
+	if (!Initialize_Matrix(  screenDepth,  screenNear))
 		return false;
 
 	// 初始化混合状态
@@ -206,11 +209,11 @@ void D3DClass::GetProjectionMatrix(XMMATRIX& projectionMatrix)
 	return;
 }
 
-void D3DClass::GetWorldMatrix(XMMATRIX& worldMatrix)
-{
-	worldMatrix = m_worldMatrix;
-	return;
-}
+//void D3DClass::GetWorldMatrix(XMMATRIX& worldMatrix)
+//{
+//	worldMatrix = m_worldMatrix;
+//	return;
+//}
 
 void D3DClass::GetOrthoMatrix(XMMATRIX& orthoMatrix)
 {
@@ -271,7 +274,7 @@ void D3DClass::TurnOffAlphaBlending()
 	return;
 }
 
-bool D3DClass::Initialize_RefreshRate(unsigned int screenWidth, unsigned int screenHeight, UINT& numerator, UINT& denominator)
+bool D3DClass::Initialize_RefreshRate(UINT& numerator, UINT& denominator)
 {
 	HRESULT				result;
 	int error;
@@ -315,9 +318,9 @@ bool D3DClass::Initialize_RefreshRate(unsigned int screenWidth, unsigned int scr
 	// 遍历所有显示模式，找到匹配屏幕尺寸的那个。并存储该模式下刷新频率的分子和分母
 	for (unsigned int i = 0; i < numModes; i++)
 	{
-		if (displayModeList[i].Width == (unsigned int)screenWidth)
+		if (displayModeList[i].Width == (unsigned int)m_screenWidth)
 		{
-			if (displayModeList[i].Height == (unsigned int)screenHeight)
+			if (displayModeList[i].Height == (unsigned int)m_screenHeight)
 			{
 				numerator = displayModeList[i].RefreshRate.Numerator;
 				denominator = displayModeList[i].RefreshRate.Denominator;
@@ -330,10 +333,8 @@ bool D3DClass::Initialize_RefreshRate(unsigned int screenWidth, unsigned int scr
 	result = adapter->GetDesc(&adapterDesc);
 	if (FAILED(result))
 		return false;
-
 	// 以兆字节为单位存储专用图形卡内存
 	m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
-
 	// 将显卡名转为多字节字符并存储
 	size_t stringLength;
 	error = wcstombs_s(&stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
@@ -344,17 +345,10 @@ bool D3DClass::Initialize_RefreshRate(unsigned int screenWidth, unsigned int scr
 	delete[] displayModeList;
 	displayModeList = 0;
 
-	// 释放适配器输出(监视器)
-	adapterOutput->Release();
-	adapterOutput = 0;
-
-	// 释放适配器(显卡)
-	adapter->Release();
-	adapter = 0;
-
-	// 释放工厂
-	factory->Release();
-	factory = 0;
+	// 释放适配器输出(监视器)、适配器(显卡)、工厂
+	RELEASE_RESOURCE(adapterOutput);
+	RELEASE_RESOURCE(adapter);
+	RELEASE_RESOURCE(factory);
 
 	return true;
 }
@@ -426,7 +420,7 @@ bool D3DClass::Initialize_renderTargetView()
 {
 	HRESULT				result;
 
-	// 取得后缓存的指针
+	// 取得后缓存的指针，0指示缓存索引（此处只有一个后缓存）
 	ID3D11Texture2D*	 backBufferPtr;
 	result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
 	if (FAILED(result))
@@ -437,9 +431,8 @@ bool D3DClass::Initialize_renderTargetView()
 	if (FAILED(result))
 		return false;
 
-	// 释放后缓存指针
-	backBufferPtr->Release();
-	backBufferPtr = nullptr;
+	// 释放后缓存
+	RELEASE_RESOURCE(backBufferPtr);
 
 	return true;
 }
@@ -472,7 +465,7 @@ bool D3DClass::Initialize_DepthStencilBuffer(int screenWidth, int screenHeight)
 	return true;
 }
 
-bool D3DClass::Initialize_depthStencilState()
+bool D3DClass::Initialize_DepthStencilState()
 {
 	HRESULT				result;
 
@@ -566,15 +559,15 @@ bool D3DClass::Initialize_RasterizerState()
 
 	// 建立光栅描述子，这将决定如何绘制多边形
 	D3D11_RASTERIZER_DESC rasterDesc;
-	rasterDesc.AntialiasedLineEnable = false;
-	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.AntialiasedLineEnable = false;	// 是否使用线性反走样
+	rasterDesc.CullMode = D3D11_CULL_BACK;		// 三角形正面背面绘制方式
 	rasterDesc.DepthBias = 0;
 	rasterDesc.DepthBiasClamp = 0.0f;
-	rasterDesc.DepthClipEnable = true;
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.FrontCounterClockwise = false;
-	rasterDesc.MultisampleEnable = false;
-	rasterDesc.ScissorEnable = false;
+	rasterDesc.DepthClipEnable = false;		// 是否使用深度裁剪
+	rasterDesc.FillMode = D3D11_FILL_SOLID; // 实心填充
+	rasterDesc.FrontCounterClockwise = false;	// false指顺时针为正面
+	rasterDesc.MultisampleEnable = true;	// 是否使用多重采样
+	rasterDesc.ScissorEnable = false;		// 是否使用裁剪矩形
 	rasterDesc.SlopeScaledDepthBias = 0.0f;
 
 	// 由刚刚建立的描述子创建光栅器状态
@@ -588,43 +581,35 @@ bool D3DClass::Initialize_RasterizerState()
 	return true;
 }
 
-bool D3DClass::Initialize_Viewport(int screenWidth, int screenHeight)
+bool D3DClass::Initialize_Viewport()
 {
-
-	// 设置绘制视点
+	// 设置绘制视口
 	D3D11_VIEWPORT		 viewport;
-	viewport.Width = (float)screenWidth;
-	viewport.Height = (float)screenHeight;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
+	// 指定客户区子窗口
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
+	viewport.Width = (float)m_screenWidth;
+	viewport.Height = (float)m_screenHeight;
+	// 指定绘制对象对应的深度缓存的最大最小值，通常与深度缓存的范围一致
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
 
-	// 创建绘制视点
+	// 将视口绑定到设备上下文的光栅化阶段，第一个参数指定视口数，第二个参数为视口指针
 	m_deviceContext->RSSetViewports(1, &viewport);
-
-	
 	return true;
 }
 
-bool D3DClass::Initialize_Matrix(int screenWidth, int screenHeight,float screenDepth, float screenNear)
+bool D3DClass::Initialize_Matrix(float screenDepth, float screenNear)
 {
-	HRESULT				result;
-
 	// 设置投影矩阵
-	float				 fieldOfView, screenAspect;
-	fieldOfView = 3.141592654f / 4.0f;
-	screenAspect = (float)screenWidth / (float)screenHeight;
-
+	float		   fieldOfView, screenAspect;
+	fieldOfView = PI / 4.0f;
+	screenAspect = (float)m_screenWidth / (float)m_screenHeight;
 	// 为3D绘制创建透视投影矩阵
 	m_projectionMatrix = XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, screenNear, screenDepth);
 
 	// 为2D绘制创建正交投影矩阵
-	m_orthoMatrix = XMMatrixOrthographicLH((float)screenWidth, (float)screenHeight, screenNear, screenDepth);
-
-	// 初始化世界矩阵为单位阵
-	m_worldMatrix = XMMatrixIdentity();
-
+	m_orthoMatrix = XMMatrixOrthographicLH((float)m_screenWidth, (float)m_screenHeight, screenNear, screenDepth);
 	return true;
 }
 
@@ -632,27 +617,30 @@ bool D3DClass::Initialize_BlendState()
 {
 	HRESULT				result;
 
-	// Clear the blend state description.
+	// 创建混合状态描述
 	D3D11_BLEND_DESC	blendStateDescription;
 	ZeroMemory(&blendStateDescription, sizeof(D3D11_BLEND_DESC));
-	// Create an alpha enabled blend state description.
-	blendStateDescription.RenderTarget[0].BlendEnable = TRUE;
-	blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	// 创建允许Alpha混合的状态描述
+	blendStateDescription.RenderTarget[0].BlendEnable = TRUE;	// 开启混合
+	blendStateDescription.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;	// 源混合因子为1
+	blendStateDescription.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA; // 目标混合因子为（1-源颜色的Alpha通道）
+	blendStateDescription.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; // 混合操作为 源+目标
+																		// 以下三项意义不明确，都设为D3D11_BLEND_ONE，应该不会影响结果
 	blendStateDescription.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	blendStateDescription.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 	blendStateDescription.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = 0x0f;
-	// Create the blend state using the description.
+	// 该项意义不明确，猜测是指定RGBA哪几个通道混合，设置为D3D11_COLOR_WRITE_ENABLE_ALL，则所有通道进行混合
+	blendStateDescription.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	// 使用混合描述创建混合状态
 	result = m_device->CreateBlendState(&blendStateDescription, &m_alphaEnableBlendingState);
 	if (FAILED(result))
 	{
 		return false;
 	}
-	// Modify the description to create an alpha disabled blend state description.
+	// 将允许Alpha混合的状态描述修改为不允许
 	blendStateDescription.RenderTarget[0].BlendEnable = FALSE;
-	// Create the blend state using the description.
+	// 使用混合描述创建混合状态
 	result = m_device->CreateBlendState(&blendStateDescription, &m_alphaDisableBlendingState);
 	if (FAILED(result))
 		return false;
