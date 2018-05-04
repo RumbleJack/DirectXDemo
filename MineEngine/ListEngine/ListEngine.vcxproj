@@ -29,7 +29,7 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -86,14 +86,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;LISTENGINE_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>../include;..\ListEngine\Common;..\ListEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../include;..\ListEngine\Common;..\ListEngine;$(DirectXIncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ImportLibrary>..\Lib\ListEngine.lib</ImportLibrary>
       <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>../lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../lib;$(DirectXLibPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -200,23 +200,24 @@
     <ClCompile Include="worldclass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bitmapclass.h" />
-    <ClInclude Include="cameraclass.h" />
+    <ClInclude Include="..\Include\fontclass.h" />
+    <ClInclude Include="..\Include\fontshaderclass.h" />
+    <ClInclude Include="..\Include\inputclass.h" />
+    <ClInclude Include="..\Include\LineClass.h" />
+    <ClInclude Include="..\Include\LineShaderClass.h" />
+    <ClInclude Include="..\Include\textclass.h" />
+    <ClInclude Include="..\Include\textureclass.h" />
+    <ClInclude Include="..\Include\textureshaderclass.h" />
+    <ClInclude Include="..\Include\worldClass.h" />
     <ClInclude Include="fontclass.h" />
-    <ClInclude Include="fontshaderclass.h" />
     <ClInclude Include="GlobalConfig.h" />
-    <ClInclude Include="LineClass.h" />
-    <ClInclude Include="LineShaderClass.h" />
     <ClInclude Include="StubGraphicClass.h" />
-    <ClInclude Include="d3dclass.h" />
     <ClInclude Include="GraphicsClass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="ListEngine.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="textclass.h" />
-    <ClInclude Include="textureclass.h" />
-    <ClInclude Include="textureshaderclass.h" />
     <ClInclude Include="worldClass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

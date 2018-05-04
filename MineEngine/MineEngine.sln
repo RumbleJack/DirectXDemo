@@ -9,11 +9,11 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TransferObjToMyModelFormat"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MineEngineFor2D", "MineEngineFor2D\MineEngineFor2D.vcxproj", "{BC5668D3-574F-4F00-8BF7-CB1A57297E8A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectForComputerGraphics", "ProjectForComputerGraphics\ProjectForComputerGraphics.vcxproj", "{9216A092-1CA0-4183-8FA2-47515F8A57CF}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TerrainRender", "TerrainRender\TerrainRender.vcxproj", "{B5AE1E73-02D7-45D0-9C1E-F504B149DAF5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TerrainRender8", "TerrainRender8\TerrainRender8.vcxproj", "{50501DF0-5F6E-4EEC-B847-B6A9C1B8001E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProjectForComputerGraphics", "ProjectForComputerGraphics\ProjectForComputerGraphics.vcxproj", "{9216A092-1CA0-4183-8FA2-47515F8A57CF}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ListEngine", "ListEngine\ListEngine.vcxproj", "{A01CC2E8-086A-4C8C-B002-9186182C206D}"
 EndProject
@@ -49,14 +49,6 @@ Global
 		{BC5668D3-574F-4F00-8BF7-CB1A57297E8A}.Release|x64.Build.0 = Release|x64
 		{BC5668D3-574F-4F00-8BF7-CB1A57297E8A}.Release|x86.ActiveCfg = Release|Win32
 		{BC5668D3-574F-4F00-8BF7-CB1A57297E8A}.Release|x86.Build.0 = Release|Win32
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x64.ActiveCfg = Debug|x64
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x64.Build.0 = Debug|x64
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x86.ActiveCfg = Debug|Win32
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x86.Build.0 = Debug|Win32
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x64.ActiveCfg = Release|x64
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x64.Build.0 = Release|x64
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x86.ActiveCfg = Release|Win32
-		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x86.Build.0 = Release|Win32
 		{B5AE1E73-02D7-45D0-9C1E-F504B149DAF5}.Debug|x64.ActiveCfg = Debug|x64
 		{B5AE1E73-02D7-45D0-9C1E-F504B149DAF5}.Debug|x64.Build.0 = Debug|x64
 		{B5AE1E73-02D7-45D0-9C1E-F504B149DAF5}.Debug|x86.ActiveCfg = Debug|Win32
@@ -73,6 +65,14 @@ Global
 		{50501DF0-5F6E-4EEC-B847-B6A9C1B8001E}.Release|x64.Build.0 = Release|x64
 		{50501DF0-5F6E-4EEC-B847-B6A9C1B8001E}.Release|x86.ActiveCfg = Release|Win32
 		{50501DF0-5F6E-4EEC-B847-B6A9C1B8001E}.Release|x86.Build.0 = Release|Win32
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x64.ActiveCfg = Debug|x64
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x64.Build.0 = Debug|x64
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x86.ActiveCfg = Debug|Win32
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Debug|x86.Build.0 = Debug|Win32
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x64.ActiveCfg = Release|x64
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x64.Build.0 = Release|x64
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x86.ActiveCfg = Release|Win32
+		{9216A092-1CA0-4183-8FA2-47515F8A57CF}.Release|x86.Build.0 = Release|Win32
 		{A01CC2E8-086A-4C8C-B002-9186182C206D}.Debug|x64.ActiveCfg = Debug|x64
 		{A01CC2E8-086A-4C8C-B002-9186182C206D}.Debug|x64.Build.0 = Debug|x64
 		{A01CC2E8-086A-4C8C-B002-9186182C206D}.Debug|x86.ActiveCfg = Debug|Win32

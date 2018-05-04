@@ -21,25 +21,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Bitmapclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Cameraclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="D3dclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Fontclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="fontshaderclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Graphicsclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="inputclass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="lightclass.cpp">
@@ -57,72 +39,15 @@
     <ClCompile Include="Systemclass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="textureclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="textureshaderclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="worldclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="textclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="shadermanagerclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="colorshaderclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="fpsclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="timerclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="userinterfaceclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="positionclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="terrainclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="applicationclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="LineShaderClass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="LineClass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="zoneclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Bitmapclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="cameraclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="fontclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="fontshaderclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Graphicsclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="inputclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Lightclass.h">
@@ -131,58 +56,13 @@
     <ClInclude Include="Lightshaderclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="modelclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Systemclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="textureclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="textureshaderclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="worldClass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="textclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="shadermanagerclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="colorshaderclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="fpsclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="timerclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="userinterfaceclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="positionclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="terrainclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="applicationclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="header.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LineClass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="LineShaderClass.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -193,9 +73,6 @@
     </ClInclude>
     <ClInclude Include="Common\PubMacroDef.h">
       <Filter>Common</Filter>
-    </ClInclude>
-    <ClInclude Include="zoneclass.h">
-      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -99,25 +99,10 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Bitmapclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cameraclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="d3dclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="inputclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ListEngine.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textureclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="textureshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="worldClass.h">
@@ -135,19 +120,37 @@
     <ClInclude Include="fontclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="fontshaderclass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="textclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LineClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="LineShaderClass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GlobalConfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\textureshaderclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\textureclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\LineShaderClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\LineClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\fontclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\inputclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\textclass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\worldClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Include\fontshaderclass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

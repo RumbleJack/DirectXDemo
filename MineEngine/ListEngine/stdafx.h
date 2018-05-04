@@ -20,7 +20,7 @@
 #include <d3d11.h>
 #include <dxgi.h>
 
-//#define DIRECTX_2010
+#define DIRECTX_2010
 #ifdef DIRECTX_2010
 // ½ûÖ¹°´16×Ö½Ú¶ÔÆë
 #define _XM_NO_INTRINSICS_

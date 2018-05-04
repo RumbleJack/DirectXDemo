@@ -83,9 +83,15 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 	vertexShaderBuffer = nullptr;
 	pixelShaderBuffer = nullptr;
 
+#ifdef DIRECTX_2010
+	// ±àÒë¶¥µã×ÅÉ«Æ÷
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
+		&vertexShaderBuffer, &errorMessage, NULL);
+#else
 	// ±àÒë¶¥µã×ÅÉ«Æ÷
 	result = D3DCompileFromFile(vsFilename, NULL, NULL, "LightVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&vertexShaderBuffer, &errorMessage);
+#endif
 	if (FAILED(result))
 	{
 		// ±àÒëÊ§°Ü
@@ -96,10 +102,16 @@ bool LightShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* 
 			MessageBox(hwnd, vsFilename, L"Missing Shader File", MB_OK);
 		return false;
 	}
-
+#ifdef DIRECTX_2010
+	// ±àÒëÏñËØ×ÅÉ«Æ÷
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
+		&pixelShaderBuffer, &errorMessage, NULL);
+#else
 	// ±àÒëÏñËØ×ÅÉ«Æ÷
 	result = D3DCompileFromFile(psFilename, NULL, NULL, "LightPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&pixelShaderBuffer, &errorMessage);
+#endif
+
 	if (FAILED(result))
 	{
 		// ±àÒëÊ§°Ü

@@ -29,7 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v100</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -104,10 +104,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Common;../include;$(DirectXIncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
+      <AdditionalLibraryDirectories>../Lib;$(DirectXLibPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>ListEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -144,70 +146,27 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="applicationclass.cpp" />
-    <ClCompile Include="Bitmapclass.cpp" />
-    <ClCompile Include="Cameraclass.cpp" />
-    <ClCompile Include="colorshaderclass.cpp" />
-    <ClCompile Include="D3dclass.cpp" />
-    <ClCompile Include="Fontclass.cpp" />
-    <ClCompile Include="fontshaderclass.cpp" />
-    <ClCompile Include="fpsclass.cpp" />
     <ClCompile Include="Graphicsclass.cpp" />
-    <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="lightclass.cpp" />
     <ClCompile Include="Lightshaderclass.cpp" />
-    <ClCompile Include="LineClass.cpp" />
-    <ClCompile Include="LineShaderClass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modelclass.cpp" />
-    <ClCompile Include="positionclass.cpp" />
-    <ClCompile Include="shadermanagerclass.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Systemclass.cpp" />
-    <ClCompile Include="terrainclass.cpp" />
-    <ClCompile Include="textclass.cpp" />
-    <ClCompile Include="textureclass.cpp" />
-    <ClCompile Include="textureshaderclass.cpp" />
-    <ClCompile Include="timerclass.cpp" />
-    <ClCompile Include="userinterfaceclass.cpp" />
-    <ClCompile Include="worldclass.cpp" />
-    <ClCompile Include="zoneclass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="applicationclass.h" />
-    <ClInclude Include="Bitmapclass.h" />
-    <ClInclude Include="cameraclass.h" />
-    <ClInclude Include="colorshaderclass.h" />
     <ClInclude Include="Common\GlobalConfig.h" />
     <ClInclude Include="Common\PubMacroDef.h" />
-    <ClInclude Include="d3dclass.h" />
-    <ClInclude Include="fontclass.h" />
-    <ClInclude Include="fontshaderclass.h" />
-    <ClInclude Include="fpsclass.h" />
     <ClInclude Include="Graphicsclass.h" />
     <ClInclude Include="header.h" />
-    <ClInclude Include="inputclass.h" />
     <ClInclude Include="Lightclass.h" />
     <ClInclude Include="Lightshaderclass.h" />
-    <ClInclude Include="LineClass.h" />
-    <ClInclude Include="LineShaderClass.h" />
-    <ClInclude Include="modelclass.h" />
-    <ClInclude Include="positionclass.h" />
-    <ClInclude Include="shadermanagerclass.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Systemclass.h" />
-    <ClInclude Include="terrainclass.h" />
-    <ClInclude Include="textclass.h" />
-    <ClInclude Include="textureclass.h" />
-    <ClInclude Include="textureshaderclass.h" />
-    <ClInclude Include="timerclass.h" />
-    <ClInclude Include="userinterfaceclass.h" />
-    <ClInclude Include="worldClass.h" />
-    <ClInclude Include="zoneclass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Engine\font.ps" />

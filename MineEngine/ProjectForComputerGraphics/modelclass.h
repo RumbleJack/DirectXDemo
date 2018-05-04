@@ -1,12 +1,6 @@
 // 文件名: modelclass.h
 #pragma once
 
-// 包含文件 
-#include <d3d11.h>
-#include <directxmath.h>
-#include <fstream>
-using namespace std;
-using namespace DirectX;
 
 
 // 包含本工程文件    

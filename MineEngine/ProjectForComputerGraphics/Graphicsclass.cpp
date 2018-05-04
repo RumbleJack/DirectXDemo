@@ -697,7 +697,7 @@ bool GraphicsClass::Render2D()
 	// 绘制文本字符串
 	//result = m_Text->Render(m_Direct3D->GetDeviceContext(), worldMatrix, orthoMatrix);
 	//if (!result)
-		return false;
+		//return false;
 	// 绘制2D图形后，开启Z-Buffer,关闭Alpha混合
 	m_Direct3D->TurnOffAlphaBlending();
 	m_Direct3D->TurnZBufferOn();

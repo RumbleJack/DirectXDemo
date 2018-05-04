@@ -90,8 +90,8 @@ bool LineShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* v
 	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "TexturePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
 		&pixelShaderBuffer, &errorMessage, NULL);
 #else
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
-		&vertexShaderBuffer, &errorMessage);
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "TexturePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+		&pixelShaderBuffer, &errorMessage);
 #endif
 	if (FAILED(result))
 	{

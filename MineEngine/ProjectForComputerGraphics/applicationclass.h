@@ -13,10 +13,6 @@
 ///////////////////////
 #include "inputclass.h"
 #include "d3dclass.h"
-#include "shadermanagerclass.h"
-#include "timerclass.h"
-#include "fpsclass.h"
-#include "zoneclass.h"
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,10 +32,6 @@ public:
 private:
 	InputClass* m_Input;
 	D3DClass* m_Direct3D;
-	ShaderManagerClass* m_ShaderManager;
-	TimerClass* m_Timer;
-	FpsClass* m_Fps;
-	ZoneClass* m_Zone;
 };
 
 #endif

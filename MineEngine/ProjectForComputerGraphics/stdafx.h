@@ -1,5 +1,5 @@
 #pragma once 
-//#define DIRECTX_2010
+#define DIRECTX_2010
 
 #include "PubMacroDef.h"
 #include "GlobalConfig.h"
@@ -21,6 +21,8 @@ struct DllExport _XMMATRIX;
 #define MEMCPY_MATRIX(A,B) memcpy(reinterpret_cast<float*>(A.m), reinterpret_cast<float*>(B.m), 16 * sizeof(float))
 #else
 //在Win8及以上平台可用
+#define _XM_NO_INTRINSICS_
+#define XM_NO_ALIGNMENT
 #include <directxmath.h>
 #include <d3dcompiler.h>
 using namespace DirectX;
