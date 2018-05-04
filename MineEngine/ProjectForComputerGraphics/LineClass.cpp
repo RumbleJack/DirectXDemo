@@ -1,5 +1,5 @@
 // ÎÄ¼şÃû: LineClass.cpp
-
+#include "stdafx.h"
 #include "LineClass.h"
 
 LineClass::LineClass()

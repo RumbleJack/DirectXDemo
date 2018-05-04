@@ -1,4 +1,5 @@
 // ÎÄ¼şÃû: cameraclass.cpp
+#include "stdafx.h"
 #include "cameraclass.h"
 
 CameraClass::CameraClass()

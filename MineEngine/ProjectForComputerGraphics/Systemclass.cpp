@@ -1,4 +1,4 @@
-// ÎÄ¼şÃû: systemclass.cpp
+#include "stdafx.h"
 #include "systemclass.h"
 
 SystemClass::SystemClass()

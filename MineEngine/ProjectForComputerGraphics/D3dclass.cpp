@@ -1,4 +1,5 @@
 // ÎÄ¼şÃû: d3dclass.cpp
+#include "stdafx.h"
 #include "d3dclass.h"
 
 D3DClass::D3DClass()

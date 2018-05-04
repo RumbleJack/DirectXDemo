@@ -1,5 +1,5 @@
 // 文件名: graphicsclass.cpp
-
+#include "stdafx.h"
 #include "graphicsclass.h"
 #include <fstream>
 #include <iomanip>
@@ -321,7 +321,7 @@ bool GraphicsClass::Render()
 	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// 绘制三维图形
-	Render3D();
+	//Render3D();
 
 	// 绘制二维图形
 	Render2D();
@@ -615,7 +615,7 @@ bool GraphicsClass::InitAScanVertexData(const STRUCT_ASCAN_DATA * pAScanData, fl
 
 STRUCT_ASCAN_DATA * GraphicsClass::GetAndLockAScanData()
 {
-	const int AScanVertexSize = 30;
+	const int AScanVertexSize = 300;
 	short * AScanDataBuff = new short[AScanVertexSize];
 
 	static STRUCT_ASCAN_DATA *backBufer = new STRUCT_ASCAN_DATA;

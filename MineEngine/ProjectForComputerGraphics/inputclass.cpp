@@ -1,4 +1,5 @@
 // ÎÄ¼şÃû: inputclass.cpp
+#include "stdafx.h"
 #include "inputclass.h"
 
 InputClass::InputClass()

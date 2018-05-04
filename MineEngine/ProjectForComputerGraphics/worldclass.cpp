@@ -1,4 +1,4 @@
-// ÎÄ¼şÃû: Worldclass.cpp
+#include "stdafx.h"
 #include "Worldclass.h"
 
 WorldClass::WorldClass()

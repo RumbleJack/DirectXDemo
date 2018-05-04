@@ -84,8 +84,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -161,6 +160,7 @@
     <ClCompile Include="modelclass.cpp" />
     <ClCompile Include="positionclass.cpp" />
     <ClCompile Include="shadermanagerclass.cpp" />
+    <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Systemclass.cpp" />
     <ClCompile Include="terrainclass.cpp" />
     <ClCompile Include="textclass.cpp" />
@@ -190,6 +190,7 @@
     <ClInclude Include="modelclass.h" />
     <ClInclude Include="positionclass.h" />
     <ClInclude Include="shadermanagerclass.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="Systemclass.h" />
     <ClInclude Include="terrainclass.h" />
     <ClInclude Include="textclass.h" />
