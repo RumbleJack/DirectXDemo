@@ -27,12 +27,12 @@ D3DClass::~D3DClass()
 {
 }
 
-bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen,
-	float screenDepth, float screenNear)
+bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, 
+						  float screenDepth, float screenNear)
 {
 	// 记录垂直同步设置、屏幕尺寸
 	m_vsync_enabled = vsync;
-	m_screenWidth = screenWidth;
+	m_screenWidth = screenWidth; 
 	m_screenHeight = screenHeight;
 	m_hwnd = hwnd;
 
@@ -42,7 +42,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 
 	// 初始化设备和交换链
-	if (!Initialize_DeviceAndSwapChain(screenWidth, screenHeight, hwnd, fullscreen, numerator, denominator))
+	if (!Initialize_DeviceAndSwapChain(fullscreen, numerator, denominator))
 		return false;
 
 	// 初始化绘制目标视图
@@ -50,15 +50,11 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 
 	//  初始化深度模板缓存
-	if (!Initialize_DepthStencilBuffer(screenWidth, screenHeight))
+	if (!Initialize_DepthStencilBufferAndView())
 		return false;
 
 	//  初始化深度模板状态
 	if (!Initialize_DepthStencilState())
-		return false;
-
-	//  初始化深度模板视图
-	if (!Initialize_DepthStencilView())
 		return false;
 
 	// 初始化光栅器状态
@@ -70,7 +66,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 
 	// 初始化矩阵
-	if (!Initialize_Matrix(  screenDepth,  screenNear))
+	if (!Initialize_Matrix( screenDepth,  screenNear))
 		return false;
 
 	// 初始化混合状态
@@ -353,22 +349,50 @@ bool D3DClass::Initialize_RefreshRate(UINT& numerator, UINT& denominator)
 	return true;
 }
 
-bool D3DClass::Initialize_DeviceAndSwapChain(int screenWidth, int screenHeight, HWND hwnd, bool fullscreen, UINT& numerator, UINT& denominator)
+bool D3DClass::Initialize_DeviceAndSwapChain( bool fullscreen, UINT& numerator, UINT& denominator)
 {
 	HRESULT				result;
+	D3D_FEATURE_LEVEL	 expectedFeatureLevel, supportFeatureLevel;
+	expectedFeatureLevel = D3D_FEATURE_LEVEL_11_0;// 设置特定等级为 DirectX 11.
+	UINT createDeviceFlags = 0;
+	//#if defined(DEBUG) || defined(_DEBUG)  
+	//	createDeviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
+	//#endif
+	result = D3D11CreateDevice(NULL,
+		D3D_DRIVER_TYPE_HARDWARE,
+		NULL,
+		createDeviceFlags,
+		&expectedFeatureLevel, 1,
+		D3D11_SDK_VERSION,
+		&m_device, &supportFeatureLevel, &m_deviceContext);
+	if (FAILED(result))
+		return false;
+	if (supportFeatureLevel != expectedFeatureLevel)
+	{
+		MessageBox(0, L"Direct3D Feature Level 11 unsupported.", 0, 0);
+		return false;
+	}
+	//result = D3D11CreateDeviceAndSwapChain(
+	//	NULL, // 默认显示适配器
+	//	D3D_DRIVER_TYPE_HARDWARE,  // 硬件实现绘制
+	//	NULL, // 硬件实现绘制不需要该参数
+	//	createDeviceFlags,	  // 不设置特殊用途Flag 如3D11_CREATE_DEVICE_DEBUG
+	//	&expectedFeatureLevel, 1, // 指定备选D3D版本,指定数组大小
+	//	D3D11_SDK_VERSION, 
+	//	&swapChainDesc, &m_swapChain, &m_device, &supportFeatureLevel, &m_deviceContext);
 
 	// 初始化交换链描述
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 	ZeroMemory(&swapChainDesc, sizeof(swapChainDesc));
-
-	// 设置一个单后缓存、并设定其尺寸、格式、刷新率、使用方式
-	swapChainDesc.BufferCount = 1;
-	swapChainDesc.BufferDesc.Width =  screenWidth;
-	swapChainDesc.BufferDesc.Height = screenHeight;
+	// 设置后缓存属性
+	swapChainDesc.BufferDesc.Width = m_screenWidth;
+	swapChainDesc.BufferDesc.Height = m_screenHeight;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED; // 将扫描线顺序为未指定
+	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;				  // 将缩放设置为未指定
 	if (m_vsync_enabled)
 	{
-		swapChainDesc.BufferDesc.RefreshRate.Numerator =   numerator;
+		swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
 		swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
 	}
 	else
@@ -376,43 +400,43 @@ bool D3DClass::Initialize_DeviceAndSwapChain(int screenWidth, int screenHeight, 
 		swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
 		swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
 	}
+	// 多重采样抗锯齿设置，此处关闭多采样
+	if (MSAA4X_ENABLED)
+	{
+		UINT num4xMsaaQuality;
+		m_device->CheckMultisampleQualityLevels(
+			DXGI_FORMAT_R8G8B8A8_UNORM, 8, &num4xMsaaQuality);
+		swapChainDesc.SampleDesc.Count = 8;
+		swapChainDesc.SampleDesc.Quality = num4xMsaaQuality - 1;
+	}
+	else
+	{
+		swapChainDesc.SampleDesc.Count = 1;
+		swapChainDesc.SampleDesc.Quality = 0;
+	}
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-
-	// 设置绘制目标窗口
-	swapChainDesc.OutputWindow = hwnd;
-
-	// 关闭多采样
-	swapChainDesc.SampleDesc.Count = 1;
-	swapChainDesc.SampleDesc.Quality = 0;
-
-	// 设置全屏或窗口模式
-	if ( fullscreen )
+	swapChainDesc.BufferCount = 1;		// 仅创建一个后缓存
+	swapChainDesc.OutputWindow = m_hwnd;  // 设置绘制目标窗口
+										  // 设置全屏或窗口模式
+	if (fullscreen)
 		swapChainDesc.Windowed = false;
 	else
 		swapChainDesc.Windowed = true;
+	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;// 显示后丢弃后缓存
+	swapChainDesc.Flags = 0;// 不置位高级标志
 
-	// 将扫描线顺序和缩放设置为未指定
-	swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapChainDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-
-	// 显示后丢弃后缓存
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-
-	// 不置位高级标志
-	swapChainDesc.Flags = 0;
-
-	// 设置特定等级为 DirectX 11.
-	D3D_FEATURE_LEVEL	 featureLevel;
-	featureLevel = D3D_FEATURE_LEVEL_11_0;
-
-	// 创建交换链，D3D设备，D3D设备上下文
-	//（如果设备上没有支持DirectX11的显卡，则将 D3D_DRIVER_TYPE_HARDWARE 替换为 D3D_DRIVER_TYPE_REFERENCE ， DirectX11将使用CPU来绘制）
-	//（如果设备具有多张显卡，则需要枚举显卡并让用户选择使用哪张显卡来支持DirectX11、然后使用该显卡创建设备)
-	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
-		D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
-	if (FAILED(result))
-		return false;
-
+	IDXGIDevice* dxgiDevice = 0;
+	m_device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
+	IDXGIAdapter* dxgiAdapter = 0;
+	dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
+	IDXGIFactory* dxgiFactory = 0;
+	(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
+	(dxgiFactory->CreateSwapChain(m_device, &swapChainDesc, &m_swapChain));
+	RELEASE_RESOURCE(dxgiDevice);
+	RELEASE_RESOURCE(dxgiAdapter);
+	RELEASE_RESOURCE(dxgiFactory);
+	// 重新创建设备交换链，开启多重采样
+	// Turn4xMsaaOn();
 	return true;
 }
 
@@ -437,7 +461,7 @@ bool D3DClass::Initialize_renderTargetView()
 	return true;
 }
 
-bool D3DClass::Initialize_DepthStencilBuffer(int screenWidth, int screenHeight)
+bool D3DClass::Initialize_DepthStencilBufferAndView()
 {
 	HRESULT				result;
 
@@ -445,25 +469,52 @@ bool D3DClass::Initialize_DepthStencilBuffer(int screenWidth, int screenHeight)
 	D3D11_TEXTURE2D_DESC depthBufferDesc;
 	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
 	// 建立深度缓存的描述子
-	depthBufferDesc.Width = screenWidth;
-	depthBufferDesc.Height = screenHeight;
-	depthBufferDesc.MipLevels = 1;
-	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Width = m_screenWidth;
+	depthBufferDesc.Height = m_screenHeight;
+	depthBufferDesc.MipLevels = 1;	// 多级渐近纹理层（mipmap level）的数量。对于深度/模板缓冲区来说，我们的纹理只需要一个多级渐近纹理层。
+	depthBufferDesc.ArraySize = 1;	// 在纹理数组中的纹理数量。对于深度/模板缓冲区来说，我们只需要一个纹理。
 	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthBufferDesc.SampleDesc.Count = 1;
-	depthBufferDesc.SampleDesc.Quality = 0;
-	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	// 多重采样抗锯齿设置，此处关闭多采样
+	if (MSAA4X_ENABLED)
+	{
+		UINT num4xMsaaQuality;
+		m_device->CheckMultisampleQualityLevels(
+			DXGI_FORMAT_R8G8B8A8_UNORM, 8, &num4xMsaaQuality);
+		depthBufferDesc.SampleDesc.Count = 8;
+		depthBufferDesc.SampleDesc.Quality = num4xMsaaQuality - 1;
+	}
+	else
+	{
+		depthBufferDesc.SampleDesc.Count = 1;
+		depthBufferDesc.SampleDesc.Quality = 0;
+	}
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT; // D3D11_USAGE_DYNAMIC
 	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthBufferDesc.CPUAccessFlags = 0;
-	depthBufferDesc.MiscFlags = 0;
+	depthBufferDesc.CPUAccessFlags = 0; // D3D11_CPU_ACCESS_WRITE
+	depthBufferDesc.MiscFlags = 0;		// 可选标志
 
-	// 创建深度缓存的纹理using the filled out description.
+										// 创建深度缓存的纹理，深度缓存及模板缓存由d3d类管理，无需初始值（第二个参数为NULL）
 	result = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
 	if (FAILED(result))
 		return false;
 
+	//// 初始化深度模板视图描述
+	//D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	//ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+	//depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS; // 多重采样需要指定为D3D11_DSV_DIMENSION_TEXTURE2DMS
+	//depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	// 创建深度模板视图，当m_depthStencilBuffer指定为强类型时，第二个参数可以为空
+	result = m_device->CreateDepthStencilView(m_depthStencilBuffer, NULL, &m_depthStencilView);
+	if (FAILED(result))
+		return false;
+
+	// 绑定绘制目标视图和深度模板视图到输出合并阶段,第一个参数是将要绑定的渲染目标的数量，此时后缓存只有一个
+	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
 	return true;
 }
+
 
 bool D3DClass::Initialize_DepthStencilState()
 {
@@ -530,28 +581,6 @@ bool D3DClass::Initialize_DepthStencilState()
 	return true;
 }
 
-bool D3DClass::Initialize_DepthStencilView()
-{
-	HRESULT				result;
-
-	// 初始化深度模板视图描述
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
-	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
-
-	// 设置深度模板视图描述
-	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-	// 创建深度模板视图
-	result = m_device->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc, &m_depthStencilView);
-	if (FAILED(result))
-		return false;
-
-	// 绑定绘制目标视图和深度模板视图到输出绘制管道
-	m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
-	return true;
-}
 
 bool D3DClass::Initialize_RasterizerState()
 {

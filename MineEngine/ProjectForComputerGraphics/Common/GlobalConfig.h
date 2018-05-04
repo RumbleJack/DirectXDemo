@@ -4,5 +4,5 @@ const bool	FULL_SCREEN = false;
 const bool	VSYNC_ENABLED = true;	//´¹Ö±Í¬²½
 const float SCREEN_DEPTH = 500.0f;
 const float SCREEN_NEAR = 1.0f;
-const bool MSAA4X_ENABLED = true;
+const bool MSAA4X_ENABLED = false;
 
