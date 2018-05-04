@@ -358,7 +358,7 @@ bool GraphicsClass::Render3D_1()
 		rotation -= 0.0f;
 
 	// 取得世界，观察和投影矩阵
-	m_Direct3D->GetWorldMatrix(worldMatrix);
+	//m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
@@ -410,7 +410,7 @@ bool GraphicsClass::Render3D_2()
 	bool result;
 
 	// 取得世界，观察和投影矩阵
-	m_Direct3D->GetWorldMatrix(worldMatrix);
+	//m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
@@ -506,7 +506,7 @@ bool GraphicsClass::Render3D_3()
 	bool result;
 
 	// 取得世界，观察和投影矩阵
-	m_Direct3D->GetWorldMatrix(worldMatrix);
+	//m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
@@ -536,7 +536,8 @@ bool GraphicsClass::RenderScanData()
 	bool result;
 
 	// 取得世界，观察和投影矩阵
-	m_Direct3D->GetWorldMatrix(worldMatrix);
+	//m_Direct3D->GetWorldMatrix(worldMatrix);
+	worldMatrix = XMMatrixIdentity();
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
@@ -647,7 +648,7 @@ bool GraphicsClass::Render2D()
 	bool result;
 
 	// 取得世界，观察和投影矩阵
-	m_Direct3D->GetWorldMatrix(worldMatrix);
+	//m_Direct3D->GetWorldMatrix(worldMatrix);
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 

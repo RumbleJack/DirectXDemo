@@ -220,7 +220,8 @@ bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager)
 	m_Camera->Render();
 
 	// Get the world, view, and projection matrices from the camera and d3d objects.
-	Direct3D->GetWorldMatrix(worldMatrix);
+	//Direct3D->GetWorldMatrix(worldMatrix);
+	worldMatrix = XMMatrixIdentity();
 	m_Camera->GetViewMatrix(viewMatrix);
 	Direct3D->GetProjectionMatrix(projectionMatrix);
 	m_Camera->GetBaseViewMatrix(baseViewMatrix);

@@ -18,6 +18,7 @@ struct DllExport _XMMATRIX;
 	#pragma comment(lib, "d3d11.lib")   
 	#pragma comment(lib, "dxgi.lib")	 
 	#pragma comment(lib, "d3dx11.lib")   
+#define MEMCPY_MATRIX(A,B) memcpy(reinterpret_cast<float*>(A.m), reinterpret_cast<float*>(B.m), 16 * sizeof(float))
 #else
 //在Win8及以上平台可用
 #include <directxmath.h>
@@ -27,9 +28,10 @@ using namespace DirectX;
 	#pragma comment(lib, "d3d11.lib")		// contains all the Direct3D functionality
 	#pragma comment(lib, "dxgi.lib")	 //contains tools to interface with the hardware
 	#pragma comment(lib, "d3dcompiler.lib")  //contains functionality for compiling shaders 
+#define MEMCPY_MATRIX(A,B) A = B
 #endif
 
-#define MEMCPY_MATRIX(A,B) memcpy(reinterpret_cast<float*>(A.m), reinterpret_cast<float*>(B.m), 16 * sizeof(float))
+
 
 
 
