@@ -1,52 +1,53 @@
-////////////////////////////////////////////////////////////////////////////////
-// 文件名: textureshaderclass.cpp
-////////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "textureshaderclass.h"
+#include "fontshaderclass.h"
 
-TextureShaderClass::TextureShaderClass()
+FontShaderClass::FontShaderClass()
 {
-	m_vertexShader = nullptr;
-	m_pixelShader = nullptr;
-	m_layout = nullptr;
-	m_matrixBuffer = nullptr;
-	m_sampleState = nullptr;
+	m_vertexShader = 0;
+	m_pixelShader = 0;
+	m_layout = 0;
+	m_constantVertexBuffer = 0;
+	m_sampleState = 0;
+	m_pixelColorBuffer = 0;
 }
 
-TextureShaderClass::TextureShaderClass(const TextureShaderClass& other)
-{
-}
-
-TextureShaderClass::~TextureShaderClass()
+FontShaderClass::FontShaderClass(const FontShaderClass& other)
 {
 }
 
-bool TextureShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
+FontShaderClass::~FontShaderClass()
+{
+}
+
+bool FontShaderClass::Initialize(ID3D11Device* device, HWND hwnd)
 {
 	bool result;
 
-	// 初始化顶点和像素着色器
-	result = InitializeShader(device, hwnd, L"../Engine/texture.vs", L"../Engine/texture.ps");
-	if (!result)
+	// Initialize the vertex and pixel shaders.
+	result = InitializeShader(device, hwnd, L"../Engine/font.vs", L"../Engine/font.ps");
+	if(!result)
+	{
 		return false;
+	}
+
 	return true;
 }
 
-void TextureShaderClass::Shutdown()
+void FontShaderClass::Shutdown()
 {
-	// 析构顶点和像素着色器及相关对象
+	// Shutdown the vertex and pixel shaders as well as the related objects.
 	ShutdownShader();
 
 	return;
 }
 
-bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
-	XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+bool FontShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCount, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
+							 XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, XMFLOAT4 pixelColor)
 {
 	bool result;
 
 	// 设置将用于绘制的着色器参数
-	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture);
+	result = SetShaderParameters(deviceContext, worldMatrix, viewMatrix, projectionMatrix, texture, pixelColor);
 	if (!result)
 		return false;
 
@@ -56,7 +57,7 @@ bool TextureShaderClass::Render(ID3D11DeviceContext* deviceContext, int indexCou
 	return true;
 }
 
-bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
+bool FontShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR* vsFilename, WCHAR* psFilename)
 {
 	HRESULT result;
 
@@ -67,13 +68,12 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	errorMessage = nullptr;
 	vertexShaderBuffer = nullptr;
 	pixelShaderBuffer = nullptr;
-
 #ifdef DIRECTX_2010
 	// 编译顶点着色器
-	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
+	result = D3DX11CompileFromFile(vsFilename, NULL, NULL, "FontVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
 		&vertexShaderBuffer, &errorMessage, NULL);
 #else
-	result = D3DCompileFromFile(vsFilename, NULL, NULL, "TextureVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(vsFilename, NULL, NULL, "FontVertexShader", "vs_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&vertexShaderBuffer, &errorMessage);
 #endif
 	if (FAILED(result))
@@ -88,10 +88,10 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	}
 #ifdef DIRECTX_2010
 	// 编译像素着色器
-	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "TexturePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
+	result = D3DX11CompileFromFile(psFilename, NULL, NULL, "FontPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0, NULL,
 		&pixelShaderBuffer, &errorMessage, NULL);
 #else
-	result = D3DCompileFromFile(psFilename, NULL, NULL, "TexturePixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
+	result = D3DCompileFromFile(psFilename, NULL, NULL, "FontPixelShader", "ps_5_0", D3D10_SHADER_ENABLE_STRICTNESS, 0,
 		&pixelShaderBuffer, &errorMessage);
 #endif
 
@@ -107,7 +107,8 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	}
 
 	// 从缓冲创建顶点着色器
-	result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(), NULL, &m_vertexShader);
+	result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(), vertexShaderBuffer->GetBufferSize(),
+		NULL, &m_vertexShader);
 	if (FAILED(result))
 		return false;
 
@@ -116,7 +117,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	if (FAILED(result))
 		return false;
 
-	// 创建顶点输入布局的描述
+	// 创建顶点着色器输入布局的描述
 	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
 	// 必须与ModelClass和shader中定义的顶点结构类型相匹配
 	polygonLayout[0].SemanticName = "POSITION";  // 着色器文件中名称匹配
@@ -126,6 +127,7 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	polygonLayout[0].AlignedByteOffset = 0;
 	polygonLayout[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygonLayout[0].InstanceDataStepRate = 0;
+
 	polygonLayout[1].SemanticName = "TEXCOORD";  // 着色器文件中名称匹配
 	polygonLayout[1].SemanticIndex = 0;
 	polygonLayout[1].Format = DXGI_FORMAT_R32G32_FLOAT;
@@ -148,23 +150,25 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	pixelShaderBuffer->Release();
 	pixelShaderBuffer = nullptr;
 
-	// 建立顶点着色器中动态矩阵常量缓冲的描述，向顶点着色器传递三个转化矩阵
-	D3D11_BUFFER_DESC	matrixBufferDesc;
+	// 建立顶点着色器中常量缓冲的描述，向顶点着色器传递三个转化矩阵
+	D3D11_BUFFER_DESC	constantBufferDesc;
 	// DYNAMIC表示资源是暂时的，可能经常被替换
-	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
-	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	matrixBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	matrixBufferDesc.MiscFlags = 0;
-	matrixBufferDesc.StructureByteStride = 0;
+	constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constantBufferDesc.ByteWidth = sizeof(ConstantVertexBufferType);
+	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	constantBufferDesc.MiscFlags = 0;
+	constantBufferDesc.StructureByteStride = 0;
 	// 创建常量缓冲指针，可以用它访问顶点着色器中的常量缓存
-	result = device->CreateBuffer(&matrixBufferDesc, NULL, &m_matrixBuffer);
-	if (FAILED(result))
+	result = device->CreateBuffer(&constantBufferDesc, NULL, &m_constantVertexBuffer);
+	if(FAILED(result))
+	{
 		return false;
+	}
 
 	// 建立纹理采样器状态描述
 	D3D11_SAMPLER_DESC	samplerDesc;
-	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	samplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
 	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_MIRROR;
 	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_MIRROR;
 	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_MIRROR;
@@ -182,55 +186,76 @@ bool TextureShaderClass::InitializeShader(ID3D11Device* device, HWND hwnd, WCHAR
 	if (FAILED(result))
 		return false;
 
+    // 建立像素着色器中常量缓冲的描述
+	D3D11_BUFFER_DESC pixelBufferDesc;
+    pixelBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	pixelBufferDesc.ByteWidth = sizeof(ConstPSBufferType);
+    pixelBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+    pixelBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    pixelBufferDesc.MiscFlags = 0;
+	pixelBufferDesc.StructureByteStride = 0;
+	// 创建常量缓冲指针，可以用它访问像素着色器中的常量缓存
+	result = device->CreateBuffer(&pixelBufferDesc, NULL, &m_pixelColorBuffer);
+	if(FAILED(result))
+	{
+		return false;
+	}
+
 	return true;
 }
 
-void TextureShaderClass::ShutdownShader()
+void FontShaderClass::ShutdownShader()
 {
-	// 释放采样器状态
-	if (m_sampleState)
+	// Release the pixel constant buffer.
+	if(m_pixelColorBuffer)
+	{
+		m_pixelColorBuffer->Release();
+		m_pixelColorBuffer = 0;
+	}
+
+	// Release the sampler state.
+	if(m_sampleState)
 	{
 		m_sampleState->Release();
 		m_sampleState = 0;
 	}
 
-	// 释放矩阵常量缓存
-	if (m_matrixBuffer)
+	// Release the constant buffer.
+	if(m_constantVertexBuffer)
 	{
-		m_matrixBuffer->Release();
-		m_matrixBuffer = nullptr;
+		m_constantVertexBuffer->Release();
+		m_constantVertexBuffer = 0;
 	}
 
-	// 释放顶点输入数据布局
-	if (m_layout)
+	// Release the layout.
+	if(m_layout)
 	{
 		m_layout->Release();
-		m_layout = nullptr;
+		m_layout = 0;
 	}
 
-	// 释放像素着色器
-	if (m_pixelShader)
+	// Release the pixel shader.
+	if(m_pixelShader)
 	{
 		m_pixelShader->Release();
-		m_pixelShader = nullptr;
+		m_pixelShader = 0;
 	}
 
-	// 释放顶点着色器
-	if (m_vertexShader)
+	// Release the vertex shader.
+	if(m_vertexShader)
 	{
 		m_vertexShader->Release();
-		m_vertexShader = nullptr;
+		m_vertexShader = 0;
 	}
 
 	return;
 }
 
-void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
+void FontShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND hwnd, WCHAR* shaderFilename)
 {
 	char* compileErrors;
 	unsigned long long bufferSize, i;
 	ofstream fout;
-
 
 	// Get a pointer to the error message text buffer.
 	compileErrors = (char*)(errorMessage->GetBufferPointer());
@@ -242,15 +267,17 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 	fout.open("shader-error.txt");
 
 	// Write out the error message.
-	for (i = 0; i<bufferSize; i++)
+	for(i=0; i<bufferSize; i++)
+	{
 		fout << compileErrors[i];
+	}
 
 	// Close the file.
 	fout.close();
 
 	// Release the error message.
 	errorMessage->Release();
-	errorMessage = nullptr;
+	errorMessage = 0;
 
 	// Pop a message up on the screen to notify the user to check the text file for compile errors.
 	MessageBox(hwnd, L"Error compiling shader.  Check shader-error.txt for message.", shaderFilename, MB_OK);
@@ -258,10 +285,10 @@ void TextureShaderClass::OutputShaderErrorMessage(ID3D10Blob* errorMessage, HWND
 	return;
 }
 
-bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix,
-	XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
+bool FontShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext, XMMATRIX worldMatrix, XMMATRIX viewMatrix, 
+										  XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture, XMFLOAT4 pixelColor)
 {
-	HRESULT						result;
+	HRESULT result;
 
 	// 转置矩阵，为送入着色器做准备（转置矩阵是因为着色器中传入的顶点坐标为行向量，需要转置矩阵进行左乘，如果是列向量，则需用原矩阵右乘）
 	worldMatrix = XMMatrixTranspose(worldMatrix);
@@ -270,31 +297,47 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 
 	// 锁定常量缓存，用于写入
 	D3D11_MAPPED_SUBRESOURCE	mappedResource;
-	result = deviceContext->Map(m_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	result = deviceContext->Map(m_constantVertexBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	if (FAILED(result))
 		return false;
 	// 获取常量缓冲区指针
-	MatrixBufferType*	dataPtr;
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
+	ConstantVertexBufferType*	dataPtr;
+	dataPtr = (ConstantVertexBufferType*)mappedResource.pData;
 	// 将矩阵赋值到常量缓冲区
 	dataPtr->world = worldMatrix;
 	dataPtr->view = viewMatrix;
 	dataPtr->projection = projectionMatrix;
 	// 解锁常量缓存
-	deviceContext->Unmap(m_matrixBuffer, 0);
-
+	deviceContext->Unmap(m_constantVertexBuffer, 0);
 	// 设置顶点着色器中的常量缓冲位置 
 	unsigned int	bufferNumber;
 	bufferNumber = 0;
 	// 更新顶点着色器中的常量缓冲数据
-	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_matrixBuffer);
+	deviceContext->VSSetConstantBuffers(bufferNumber, 1, &m_constantVertexBuffer);
 	// 为像素着色器设置纹理资源
 	deviceContext->PSSetShaderResources(0, 1, &texture);
+
+	// 锁定常量缓存，用于写入
+	result = deviceContext->Map(m_pixelColorBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if(FAILED(result))
+	{
+		return false;
+	}
+	// 获取常量缓冲区指针
+	ConstPSBufferType* dataPtr2;
+	dataPtr2 = (ConstPSBufferType*)mappedResource.pData;
+	// 将矩阵赋值到常量缓冲区
+	dataPtr2->pixelColor = pixelColor;
+	// 解锁常量缓存
+	deviceContext->Unmap(m_pixelColorBuffer, 0);
+	// 像素着色器中的常量缓冲位置 
+	bufferNumber = 0;
+	deviceContext->PSSetConstantBuffers(bufferNumber, 1, &m_pixelColorBuffer);
 
 	return true;
 }
 
-void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
+void FontShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int indexCount)
 {
 	// 设置顶点输入布局
 	deviceContext->IASetInputLayout(m_layout);
@@ -306,7 +349,7 @@ void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int in
 	// 设置像素着色器中的采样器状态
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 
-	// 设置绘制起点，绘制三角形（对三角形的指定在BitmapClass中指定）
+	// 绘制三角形
 	deviceContext->DrawIndexed(indexCount, 0, 0);
 
 	return;

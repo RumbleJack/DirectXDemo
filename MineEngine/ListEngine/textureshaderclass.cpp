@@ -6,11 +6,11 @@
 
 TextureShaderClass::TextureShaderClass()
 {
-	m_vertexShader = nullptr;
-	m_pixelShader = nullptr;
-	m_layout = nullptr;
-	m_matrixBuffer = nullptr;
-	m_sampleState = nullptr;
+	m_vertexShader	= nullptr;
+	m_pixelShader	= nullptr;
+	m_layout		= nullptr;
+	m_matrixBuffer	= nullptr;
+	m_sampleState	= nullptr;
 }
 
 TextureShaderClass::TextureShaderClass(const TextureShaderClass& other)
@@ -262,7 +262,7 @@ bool TextureShaderClass::SetShaderParameters(ID3D11DeviceContext* deviceContext,
 	XMMATRIX projectionMatrix, ID3D11ShaderResourceView* texture)
 {
 	HRESULT						result;
-
+	
 	// 转置矩阵，为送入着色器做准备（转置矩阵是因为着色器中传入的顶点坐标为行向量，需要转置矩阵进行左乘，如果是列向量，则需用原矩阵右乘）
 	worldMatrix = XMMatrixTranspose(worldMatrix);
 	viewMatrix = XMMatrixTranspose(viewMatrix);
@@ -302,7 +302,7 @@ void TextureShaderClass::RenderShader(ID3D11DeviceContext* deviceContext, int in
 	// 设置顶点和像素着色器，它们将被用于绘制三角形
 	deviceContext->VSSetShader(m_vertexShader, NULL, 0);
 	deviceContext->PSSetShader(m_pixelShader, NULL, 0);
-
+	
 	// 设置像素着色器中的采样器状态
 	deviceContext->PSSetSamplers(0, 1, &m_sampleState);
 

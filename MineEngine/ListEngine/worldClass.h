@@ -11,7 +11,7 @@ public:
 
 	void SetPosition(int x, int y, int z);
 	void SetRotation(int x, int y, int z);
-	void SetScaling(int x, int y, int z);
+	void SetScaling (int x, int y, int z);
 	void SetPosition(float, float, float);
 	void SetRotation(float, float, float);
 	void SetScaling(float, float, float);
@@ -28,7 +28,7 @@ private:
 	// 对象坐标系相对世界坐标系的位置、旋转、缩放
 	float m_positionX, m_positionY, m_positionZ;
 	float m_rotationX, m_rotationY, m_rotationZ;
-	float m_scalingX, m_scalingY, m_scalingZ;
+	float m_scalingX,  m_scalingY,  m_scalingZ;
 	// 由对象坐标系转化到世界坐标系的矩阵
 	XMMATRIX m_worldMatrix;
 };

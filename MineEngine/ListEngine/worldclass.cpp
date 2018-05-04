@@ -28,7 +28,7 @@ void WorldClass::SetPosition(int x, int y, int z)
 {
 	SetPosition((float)x, (float)y, (float)z);
 }
-void WorldClass::SetRotation(int x, int y, int z)
+void WorldClass::SetRotation(int x, int y, int z) 
 {
 	SetRotation((float)x, (float)y, (float)z);
 }
@@ -74,17 +74,17 @@ XMFLOAT3 WorldClass::GetScaling()
 
 void WorldClass::Render()
 {
-	XMMATRIX T1, T2;
+	XMMATRIX T1,T2;
 
 	// 由平移、缩放、旋转生成World矩阵
 	T1 = XMMatrixTranslation(m_positionX, m_positionY, m_positionZ);
 	T2 = XMMatrixRotationY(m_rotationY);
 
-	m_worldMatrix = T1 * T2;
+	m_worldMatrix = T1*T2;
 
 	// 由平移、缩放、旋转生成World矩阵
-	m_worldMatrix = XMMatrixTranslation(m_positionX, m_positionY, m_positionZ);
-
+	m_worldMatrix= XMMatrixTranslation(m_positionX, m_positionY, m_positionZ);
+	
 
 	//每次生成世界矩阵后，将矩阵复位
 	m_positionX = 0.0f;

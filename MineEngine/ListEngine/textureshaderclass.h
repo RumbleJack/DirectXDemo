@@ -20,8 +20,8 @@ public:
 
 	bool Initialize(ID3D11Device*, HWND);
 	void Shutdown();
-	bool Render(ID3D11DeviceContext* deviceContext, int indexCount,
-		XMMATRIX worldMatrix, XMMATRIX viewMatrix, XMMATRIX projectionMatrix,
+	bool Render(ID3D11DeviceContext* deviceContext, int indexCount, 
+		XMMATRIX worldMatrix, XMMATRIX viewMatrix,XMMATRIX projectionMatrix, 
 		ID3D11ShaderResourceView* texture);
 
 private:
@@ -35,7 +35,7 @@ private:
 
 private:
 	// 着色器
-	ID3D11VertexShader * m_vertexShader;
+	ID3D11VertexShader* m_vertexShader;
 	ID3D11PixelShader*  m_pixelShader;
 
 	// 着色器输入参数布局

@@ -171,7 +171,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 
 	// 为2维图形创建观察矩阵
 	XMMATRIX baseViewMatrix;
-	m_Camera->SetPosition(0.0f, 0.0f, -1.0f);
+	m_Camera->SetPosition(0.0f, 0.0f, -100.0f);
 	m_Camera->Render();
 	m_Camera->GetViewMatrix(baseViewMatrix);
 
@@ -370,7 +370,7 @@ bool GraphicsClass::Render3D_1()
 	m_Direct3D->GetProjectionMatrix(projectionMatrix);
 
 	// 创建旋转World矩阵
-	m_World->SetRotation(0, rotation, 0);
+	m_World->SetRotation(0, (int)rotation, 0);
 	m_World->Render();
 	m_World->GetWorldMatrix(worldMatrix);
 
@@ -548,10 +548,22 @@ bool GraphicsClass::RenderScanData()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
+	RECT rectPos = { 0, 0,300,-300 };
+	// 将二维图像顶点和索引缓存放入图形管道，准备绘制
+	result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), rectPos);
+	if (!result)
+		return false;
+	// 使用纹理着色器绘制二维图像
+	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap->GetTexture());
+	if (!result)
+		return false;
+	// 绘制2D图形后，开启Z-Buffer
+
 	// 根据输入A扫描数据构造点
 	const int	 AScanVertexSize = 3000;
 	int			 renderSize = 0;
 	static float AScanVertexBuffer[AScanVertexSize * 2];
+
 
 	// 构造A扫曲线绘制区域
 	LONG left = -m_screenWidth / 2 ;
@@ -585,16 +597,7 @@ bool GraphicsClass::RenderScanData()
 	if (!result)
 		return false;
 
-	RECT rectPos = { 00, 0,300,300 };
-	// 将二维图像顶点和索引缓存放入图形管道，准备绘制
-	result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), rectPos);
-	if (!result)
-		return false;
-	// 使用纹理着色器绘制二维图像
-	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap->GetTexture());
-	if (!result)
-		return false;
-	// 绘制2D图形后，开启Z-Buffer
+	
 
 	m_Direct3D->TurnZBufferOn();
 	return true;
@@ -694,7 +697,7 @@ bool GraphicsClass::Render2D()
 	// 绘制文本字符串
 	//result = m_Text->Render(m_Direct3D->GetDeviceContext(), worldMatrix, orthoMatrix);
 	//if (!result)
-	//	return false;
+		return false;
 	// 绘制2D图形后，开启Z-Buffer,关闭Alpha混合
 	m_Direct3D->TurnOffAlphaBlending();
 	m_Direct3D->TurnZBufferOn();
