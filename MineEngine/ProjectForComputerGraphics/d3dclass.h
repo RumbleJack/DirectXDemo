@@ -9,7 +9,7 @@ public:
 	D3DClass(const D3DClass&);
 	~D3DClass();
 
-	bool Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen,  float screenDepth, float screenNear);
+	bool Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, float screenDepth, float screenNear);
 	void Shutdown();
 
 	void BeginScene(float red, float green, float blue, float alpha);
@@ -22,7 +22,7 @@ public:
 	// 获取默认的透视投影和正交投影矩阵
 	void GetProjectionMatrix(XMMATRIX&);
 	void GetOrthoMatrix(XMMATRIX&);
-	
+
 	// 开启关闭Z缓存、Alpha混合、4倍抗锯齿
 	void TurnZBufferOn();
 	void TurnZBufferOff();
@@ -33,8 +33,8 @@ public:
 
 private:
 	// 将Initialize拆分为以下子函数
-	bool Initialize_RefreshRate( UINT& numerator, UINT& denominator);
-	bool Initialize_DeviceAndSwapChain( bool fullscreen, UINT& numerator, UINT& denominator);
+	bool Initialize_RefreshRate(UINT& numerator, UINT& denominator);
+	bool Initialize_DeviceAndSwapChain(bool fullscreen, UINT& numerator, UINT& denominator);
 	bool Initialize_renderTargetView();
 	bool Initialize_DepthStencilBufferAndView();
 	bool Initialize_Viewport();
@@ -42,7 +42,7 @@ private:
 	bool Initialize_DepthStencilState();
 	bool Initialize_RasterizerState();
 	bool Initialize_BlendState();
-	bool Initialize_Matrix( float screenDepth, float screenNear);
+	bool Initialize_Matrix(float screenDepth, float screenNear);
 
 	// 这两个函数还没写好，不能用
 	void Turn4xMsaaOn();
@@ -60,7 +60,7 @@ private:
 	ID3D11DepthStencilView*  m_depthStencilView;	// 深度模板缓存
 
 
-	// D3D状态声明
+													// D3D状态声明
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11DepthStencilState* m_depthDisabledStencilState;
 	ID3D11RasterizerState*	 m_rasterState;

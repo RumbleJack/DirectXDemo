@@ -26,8 +26,12 @@ struct DllExport _XMMATRIX;
 using namespace DirectX;
 //// Á´½Ó
 	#pragma comment(lib, "d3d11.lib")		// contains all the Direct3D functionality
+	
 	#pragma comment(lib, "dxgi.lib")	 //contains tools to interface with the hardware
 	#pragma comment(lib, "d3dcompiler.lib")  //contains functionality for compiling shaders 
+	//#pragma comment(lib, "d3dx11.lib")   	
+	//#pragma comment(lib, "d3dx10.lib")   
+	//#pragma comment(lib, "dxerr.lib")  
 #define MEMCPY_MATRIX(A,B) A = B
 #endif
 

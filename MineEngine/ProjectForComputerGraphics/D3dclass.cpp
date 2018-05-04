@@ -17,6 +17,8 @@ D3DClass::D3DClass()
 	m_depthDisabledStencilState = nullptr;
 	m_alphaEnableBlendingState = nullptr;
 	m_alphaDisableBlendingState = nullptr;
+
+	m_screenWidth = m_screenHeight = 0;
 }
 
 D3DClass::D3DClass(const D3DClass& other)
@@ -27,18 +29,18 @@ D3DClass::~D3DClass()
 {
 }
 
-bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen, 
-						  float screenDepth, float screenNear)
+bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hwnd, bool fullscreen,
+	float screenDepth, float screenNear)
 {
 	// 记录垂直同步设置、屏幕尺寸
 	m_vsync_enabled = vsync;
-	m_screenWidth = screenWidth; 
+	m_screenWidth = screenWidth;
 	m_screenHeight = screenHeight;
 	m_hwnd = hwnd;
 
 	// 取得刷新频率的分子和分母
 	UINT	numerator, denominator;
-	if (!Initialize_RefreshRate( numerator, denominator))
+	if (!Initialize_RefreshRate(numerator, denominator))
 		return false;
 
 	// 初始化设备和交换链
@@ -66,7 +68,7 @@ bool D3DClass::Initialize(int screenWidth, int screenHeight, bool vsync, HWND hw
 		return false;
 
 	// 初始化矩阵
-	if (!Initialize_Matrix( screenDepth,  screenNear))
+	if (!Initialize_Matrix(screenDepth, screenNear))
 		return false;
 
 	// 初始化混合状态
@@ -132,22 +134,31 @@ void D3DClass::Shutdown()
 		m_renderTargetView = 0;
 	}
 
+	if (m_swapChain)
+	{
+		m_swapChain->Release();
+		m_swapChain = 0;
+	}
+
 	if (m_deviceContext)
 	{
 		m_deviceContext->Release();
 		m_deviceContext = 0;
 	}
 
+	//#if defined(DEBUG) || defined(_DEBUG)  
+	//	ID3D11Debug *d3dDebug;
+	//	HRESULT hr = m_device->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&d3dDebug));
+	//	if (SUCCEEDED(hr))
+	//	{
+	//		hr = d3dDebug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	//	}
+	//	if (d3dDebug != nullptr)            d3dDebug->Release();
+	//#endif  
 	if (m_device)
 	{
 		m_device->Release();
 		m_device = 0;
-	}
-
-	if (m_swapChain)
-	{
-		m_swapChain->Release();
-		m_swapChain = 0;
 	}
 
 	return;
@@ -155,19 +166,18 @@ void D3DClass::Shutdown()
 
 void D3DClass::BeginScene(float red, float green, float blue, float alpha)
 {
+	// 后缓存清空颜色
 	float color[4];
-
-	// 设置用于清除缓存的颜色
 	color[0] = red;
 	color[1] = green;
 	color[2] = blue;
 	color[3] = alpha;
 
-	// 清除后缓存
+	// 清空后缓存为指定颜色
 	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
 
-	// 清除深度缓存
-	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	// 清空深度、模板缓存为1.0和0
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
 	return;
 }
@@ -201,19 +211,14 @@ ID3D11DeviceContext* D3DClass::GetDeviceContext()
 
 void D3DClass::GetProjectionMatrix(XMMATRIX& projectionMatrix)
 {
-	projectionMatrix = m_projectionMatrix;
+	MEMCPY_MATRIX(projectionMatrix, m_projectionMatrix);
 	return;
 }
 
-//void D3DClass::GetWorldMatrix(XMMATRIX& worldMatrix)
-//{
-//	worldMatrix = m_worldMatrix;
-//	return;
-//}
-
 void D3DClass::GetOrthoMatrix(XMMATRIX& orthoMatrix)
 {
-	orthoMatrix = m_orthoMatrix;
+	MEMCPY_MATRIX(orthoMatrix, m_projectionMatrix);
+	MEMCPY_MATRIX(orthoMatrix, m_orthoMatrix);
 	return;
 }
 
@@ -238,16 +243,16 @@ void D3DClass::TurnZBufferOff()
 
 void D3DClass::TurnOnAlphaBlending()
 {
+	// 设置 blend factor.
 	float blendFactor[4];
-
-
-	// Setup the blend factor.
 	blendFactor[0] = 0.0f;
 	blendFactor[1] = 0.0f;
 	blendFactor[2] = 0.0f;
 	blendFactor[3] = 0.0f;
 
-	// Turn on the alpha blending.
+	// 开启Alpha混合
+	// blendFactor仅在混在状态描述中混合因子设置为D3D11_BLEND_BLEND_FACTOR时有效;
+	// 0xffffffff为采样掩码，我理解为与输入4字节颜色的相与值
 	m_deviceContext->OMSetBlendState(m_alphaEnableBlendingState, blendFactor, 0xffffffff);
 
 	return;
@@ -255,19 +260,63 @@ void D3DClass::TurnOnAlphaBlending()
 
 void D3DClass::TurnOffAlphaBlending()
 {
+	// 设置 blend factor.
 	float blendFactor[4];
-
-
-	// Setup the blend factor.
 	blendFactor[0] = 0.0f;
 	blendFactor[1] = 0.0f;
 	blendFactor[2] = 0.0f;
 	blendFactor[3] = 0.0f;
 
-	// Turn off the alpha blending.
+	// 关闭Alpha混合
+	// blendFactor仅在混在状态描述中混合因子设置为D3D11_BLEND_BLEND_FACTOR时有效;
+	// 0xffffffff为采样掩码，我理解为与输入4字节颜色的相与值
 	m_deviceContext->OMSetBlendState(m_alphaDisableBlendingState, blendFactor, 0xffffffff);
 
 	return;
+}
+
+void D3DClass::Turn4xMsaaOn()
+{
+	//RELEASE_RESOURCE(m_swapChain);
+
+	//UINT num4xMsaaQuality;
+	//m_device->CheckMultisampleQualityLevels(
+	//	DXGI_FORMAT_R8G8B8A8_UNORM, 4, &num4xMsaaQuality);
+
+	////m_swapChainDesc.SampleDesc.Count = 4;
+	////m_swapChainDesc.SampleDesc.Quality = num4xMsaaQuality - 1;
+
+	//IDXGIDevice* dxgiDevice = 0;
+	//m_device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
+	//IDXGIAdapter* dxgiAdapter = 0;
+	//dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
+	//IDXGIFactory* dxgiFactory = 0;
+	//(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
+	//(dxgiFactory->CreateSwapChain(m_device, &m_swapChainDesc, &m_swapChain));
+
+	//RELEASE_RESOURCE(dxgiDevice);
+	//RELEASE_RESOURCE(dxgiAdapter);
+	//RELEASE_RESOURCE(dxgiFactory);
+}
+
+void D3DClass::Turn4xMsaaOff()
+{
+	/*RELEASE_RESOURCE(m_swapChain);
+
+	m_swapChainDesc.SampleDesc.Count = 1;
+	m_swapChainDesc.SampleDesc.Quality = 0;
+
+	IDXGIDevice* dxgiDevice = 0;
+	m_device->QueryInterface(__uuidof(IDXGIDevice), (void**)&dxgiDevice);
+	IDXGIAdapter* dxgiAdapter = 0;
+	dxgiDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&dxgiAdapter);
+	IDXGIFactory* dxgiFactory = 0;
+	(dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory));
+	(dxgiFactory->CreateSwapChain(m_device, &m_swapChainDesc, &m_swapChain));
+
+	RELEASE_RESOURCE(dxgiDevice);
+	RELEASE_RESOURCE(dxgiAdapter);
+	RELEASE_RESOURCE(dxgiFactory);*/
 }
 
 bool D3DClass::Initialize_RefreshRate(UINT& numerator, UINT& denominator)
@@ -349,8 +398,22 @@ bool D3DClass::Initialize_RefreshRate(UINT& numerator, UINT& denominator)
 	return true;
 }
 
-bool D3DClass::Initialize_DeviceAndSwapChain( bool fullscreen, UINT& numerator, UINT& denominator)
+bool D3DClass::Initialize_DeviceAndSwapChain(bool fullscreen, UINT& numerator, UINT& denominator)
 {
+	/*
+	IDXGIAdapter* pAdapter = NULL 表示使用基础显示适配器
+	D3D_DRIVER_TYPE DriverType = D3D_DRIVER_TYPE_HARDWARE 表示硬件实现绘制
+	HMODULE Software = NULL, 硬件实现绘制不需要该参数
+	UINT Flags = 0, 不设置特殊用途Flag
+	D3D_FEATURE_LEVEL* pFeatureLevels = &featureLevel 指定备选D3D版本
+	UINT FeatureLevels = 1 指定上一数组大小
+	UINT SDKVersion = D3D11_SDK_VERSION 总是该选项
+	DXGI_SWAP_CHAIN_DESC* pSwapChainDesc = &swapChainDesc 将要创建的交换链描述
+	IDXGISwapChain** ppSwapChain = &m_swapChain,  需创建的交换链
+	ID3D11Device** ppDevice = &m_device 需创建的设备
+	D3D_FEATURE_LEVEL* pFeatureLevel = NULL 返回设备支持的D3D版本，此处设为NULL，不检验
+	ID3D11DeviceContext** ppImmediateContext =  &m_deviceContext 需创建的设备上下文
+	*/
 	HRESULT				result;
 	D3D_FEATURE_LEVEL	 expectedFeatureLevel, supportFeatureLevel;
 	expectedFeatureLevel = D3D_FEATURE_LEVEL_11_0;// 设置特定等级为 DirectX 11.
@@ -515,7 +578,6 @@ bool D3DClass::Initialize_DepthStencilBufferAndView()
 	return true;
 }
 
-
 bool D3DClass::Initialize_DepthStencilState()
 {
 	HRESULT				result;
@@ -580,7 +642,6 @@ bool D3DClass::Initialize_DepthStencilState()
 
 	return true;
 }
-
 
 bool D3DClass::Initialize_RasterizerState()
 {
@@ -675,3 +736,4 @@ bool D3DClass::Initialize_BlendState()
 		return false;
 	return true;
 }
+
