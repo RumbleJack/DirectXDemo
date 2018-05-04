@@ -16,6 +16,9 @@
     <Filter Include="着色器">
       <UniqueIdentifier>{c5754e57-39cd-487d-8548-998d0128f8fa}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{eff9eeb3-ff97-4137-bc70-546294f2a62e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Bitmapclass.cpp">
@@ -187,6 +190,12 @@
     </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\GlobalConfig.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\PubMacroDef.h">
+      <Filter>Common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
