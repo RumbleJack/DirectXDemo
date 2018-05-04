@@ -52,7 +52,7 @@ bool ZoneClass::Initialize(D3DClass* Direct3D, HWND hwnd, int screenWidth, int s
 	// Set the initial position of the camera and build the matrices needed for rendering.
 	m_Camera->SetPosition(0.0f, 0.0f, -10.0f);
 	m_Camera->Render();
-	m_Camera->RenderBaseViewMatrix();
+	//m_Camera->RenderBaseViewMatrix();
 
 	// Create the position object.
 	m_Position = new PositionClass;
@@ -224,7 +224,7 @@ bool ZoneClass::Render(D3DClass* Direct3D, ShaderManagerClass* ShaderManager)
 	worldMatrix = XMMatrixIdentity();
 	m_Camera->GetViewMatrix(viewMatrix);
 	Direct3D->GetProjectionMatrix(projectionMatrix);
-	m_Camera->GetBaseViewMatrix(baseViewMatrix);
+	m_Camera->GetBasicViewMatrix(baseViewMatrix);
 	Direct3D->GetOrthoMatrix(orthoMatrix);
 	
 	// Clear the buffers to begin the scene.

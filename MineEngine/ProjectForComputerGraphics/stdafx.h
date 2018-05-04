@@ -36,6 +36,13 @@ using namespace DirectX;
 #endif
 
 
+#include <stdio.h>
+#include <fstream>
+#include <map>
+using std::ofstream;
+using std::ifstream;
+using std::map;
+
 
 
 

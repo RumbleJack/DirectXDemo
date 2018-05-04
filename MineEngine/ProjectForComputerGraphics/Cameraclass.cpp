@@ -6,22 +6,24 @@ CameraClass::CameraClass()
 {
 	m_positionX = 0.0f;
 	m_positionY = 0.0f;
-	m_positionZ = 0.0f;
+	m_positionZ = -1.0f;
 
 	m_rotationX = 0.0f;
 	m_rotationY = 0.0f;
 	m_rotationZ = 0.0f;
 
-
 }
+
 
 CameraClass::CameraClass(const CameraClass& other)
 {
 }
 
+
 CameraClass::~CameraClass()
 {
 }
+
 
 void CameraClass::SetPosition(float x, float y, float z)
 {
@@ -31,6 +33,7 @@ void CameraClass::SetPosition(float x, float y, float z)
 	return;
 }
 
+
 void CameraClass::SetRotation(float x, float y, float z)
 {
 	m_rotationX = x;
@@ -39,33 +42,33 @@ void CameraClass::SetRotation(float x, float y, float z)
 	return;
 }
 
-void CameraClass::UpdePositionFromWorldToCamera(float deltaXInWorld, float deltaYInWorld, float deltaZInWorld)
+void CameraClass::UpdateCameraPosition(float deltaXInCamera, float deltaYInCamera, float deltaZInCamera)
 {
 	float yaw, pitch, roll;
 
 	// 转化为弧度值
 	pitch = m_rotationX * 0.0174532925f;
-	yaw   = m_rotationY * 0.0174532925f;
-	roll  = m_rotationZ * 0.0174532925f;
+	yaw = m_rotationY * 0.0174532925f;
+	roll = m_rotationZ * 0.0174532925f;
 
 	// 创建旋转矩阵，使用 yaw, pitch, 和 roll 的值.
 	XMMATRIX rotationMatrix;
 	rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
 
 	// 创建相机位移的XMVECTOR
-	XMFLOAT3 deltaPositionInWorldCordinate = XMFLOAT3(deltaXInWorld, deltaYInWorld, deltaZInWorld);
-	XMVECTOR deltaPositionVectorFromWorldToCamera = XMLoadFloat3(&deltaPositionInWorldCordinate);
+	XMFLOAT3 deltaPosInCamCoord = XMFLOAT3(deltaXInCamera, deltaYInCamera, deltaZInCamera);
+	XMVECTOR deltaPosVecInWorldCoord = XMLoadFloat3(&deltaPosInCamCoord);
 
 	// 将世界坐标系的位移，转化为相机坐标系的位移
-	deltaPositionVectorFromWorldToCamera = XMVector3TransformCoord(deltaPositionVectorFromWorldToCamera, rotationMatrix);
+	deltaPosVecInWorldCoord = XMVector3TransformCoord(deltaPosVecInWorldCoord, rotationMatrix);
 
 	// 计算当前相机位置
-	XMFLOAT3 deltaPositionInCameraCordinate;
-	XMStoreFloat3(&deltaPositionInCameraCordinate, deltaPositionVectorFromWorldToCamera);
-	m_positionX += deltaPositionInCameraCordinate.x;
-	m_positionY += deltaPositionInCameraCordinate.y;
-	m_positionZ += deltaPositionInCameraCordinate.z;
-	
+	XMFLOAT3 deltaPosInWorldCoord;
+	XMStoreFloat3(&deltaPosInWorldCoord, deltaPosVecInWorldCoord);
+	m_positionX += deltaPosInWorldCoord.x;
+	m_positionY += deltaPosInWorldCoord.y;
+	m_positionZ += deltaPosInWorldCoord.z;
+
 	return;
 }
 
@@ -82,11 +85,8 @@ XMFLOAT3 CameraClass::GetRotation()
 void CameraClass::Render()
 {
 	XMFLOAT3 up, position, lookAt;
-
 	XMVECTOR upVector, positionVector, lookAtVector;
-
 	float yaw, pitch, roll;
-
 	XMMATRIX rotationMatrix;
 
 	// 建立相机上方的方向向量
@@ -111,8 +111,8 @@ void CameraClass::Render()
 
 	// 转化为弧度值
 	pitch = m_rotationX * 0.0174532925f;
-	yaw   = m_rotationY * 0.0174532925f;
-	roll  = m_rotationZ * 0.0174532925f;
+	yaw = m_rotationY * 0.0174532925f;
+	roll = m_rotationZ * 0.0174532925f;
 
 	// 创建旋转矩阵，使用 yaw, pitch, 和 roll 的值.
 	rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
@@ -130,68 +130,16 @@ void CameraClass::Render()
 	return;
 }
 
-void CameraClass::GetViewMatrix(XMMATRIX& viewMatrix)
+void CameraClass::GetViewMatrix(XMMATRIX & viewMatrix)
 {
-	viewMatrix = m_viewMatrix;
-	return;
+	MEMCPY_MATRIX(viewMatrix, m_viewMatrix);
 }
 
-void CameraClass::RenderBaseViewMatrix()
+void CameraClass::GetBasicViewMatrix(XMMATRIX &baseViewMatrix)
 {
-	XMFLOAT3 up, position, lookAt;
-	XMVECTOR upVector, positionVector, lookAtVector;
-	float yaw, pitch, roll;
-	XMMATRIX rotationMatrix;
-
-
-	// Setup the vector that points upwards.
-	up.x = 0.0f;
-	up.y = 1.0f;
-	up.z = 0.0f;
-
-	// Load it into a XMVECTOR structure.
-	upVector = XMLoadFloat3(&up);
-
-	// Setup the position of the camera in the world.
-	position.x = m_positionX;
-	position.y = m_positionY;
-	position.z = m_positionZ;
-
-	// Load it into a XMVECTOR structure.
-	positionVector = XMLoadFloat3(&position);
-
-	// Setup where the camera is looking by default.
-	lookAt.x = 0.0f;
-	lookAt.y = 0.0f;
-	lookAt.z = 1.0f;
-
-	// Load it into a XMVECTOR structure.
-	lookAtVector = XMLoadFloat3(&lookAt);
-
-	// Set the yaw (Y axis), pitch (X axis), and roll (Z axis) rotations in radians.
-	pitch = m_rotationX * 0.0174532925f;
-	yaw = m_rotationY * 0.0174532925f;
-	roll = m_rotationZ * 0.0174532925f;
-
-	// Create the rotation matrix from the yaw, pitch, and roll values.
-	rotationMatrix = XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-
-	// Transform the lookAt and up vector by the rotation matrix so the view is correctly rotated at the origin.
-	lookAtVector = XMVector3TransformCoord(lookAtVector, rotationMatrix);
-	upVector = XMVector3TransformCoord(upVector, rotationMatrix);
-
-	// Translate the rotated camera position to the location of the viewer.
-	lookAtVector = XMVectorAdd(positionVector, lookAtVector);
-
-	// Finally create the view matrix from the three updated vectors.
-	m_baseViewMatrix = XMMatrixLookAtLH(positionVector, lookAtVector, upVector);
-
-	return;
+	SetPosition(0.0f, 0.0f, -762.0f);
+	SetRotation(0.0f, 0.0f, 0.0f);
+	Render();
+	MEMCPY_MATRIX(baseViewMatrix, m_viewMatrix);
 }
 
-
-void CameraClass::GetBaseViewMatrix(XMMATRIX& viewMatrix)
-{
-	viewMatrix = m_baseViewMatrix;
-	return;
-}

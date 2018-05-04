@@ -155,19 +155,19 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	m_Light->SetSpecularColor(1.0f, 1.0f, 1.0f, 1.0f);
 	m_Light->SetSpecularPower(32.0f);
 
-	//// 创建二维图像
-	//m_Bitmap = new BitmapClass;
-	//if (!m_Bitmap)
-	//	return false;
+	// 创建二维图像
+	m_Bitmap = new BitmapClass;
+	if (!m_Bitmap)
+		return false;
 
-	//// 初始化二维图像
-	//result = m_Bitmap->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(),
-	//	screenWidth, screenHeight, "../Engine/data/stone01.tga", 256, 256);
-	//if (!result)
-	//{
-	//	MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK);
-	//	return false;
-	//}
+	// 初始化二维图像
+	result = m_Bitmap->Initialize(m_Direct3D->GetDevice(), m_Direct3D->GetDeviceContext(),
+		screenWidth, screenHeight, "../Engine/data/stone01.tga", 256, 256);
+	if (!result)
+	{
+		MessageBox(hwnd, L"Could not initialize the bitmap object.", L"Error", MB_OK);
+		return false;
+	}
 
 	// 为2维图形创建观察矩阵
 	XMMATRIX baseViewMatrix;
@@ -231,6 +231,7 @@ void GraphicsClass::Shutdown()
 	// 释放输入状态指针
 	delete m_inputDeviceState;
 
+
 	// 释放文本对象
 	if (m_Text)
 	{
@@ -238,7 +239,13 @@ void GraphicsClass::Shutdown()
 		delete m_Text;
 		m_Text = 0;
 	}
-
+	if (m_Bitmap)
+	{
+		m_Bitmap->Shutdown();
+		delete m_Bitmap;
+		m_Bitmap = 0;
+	}
+	
 	// 释放 LightClass 对象
 	if (m_Light)
 	{
@@ -321,7 +328,7 @@ bool GraphicsClass::Render()
 	m_Direct3D->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
 	// 绘制三维图形
-	//Render3D();
+	Render3D();
 
 	// 绘制二维图形
 	Render2D();
@@ -577,6 +584,18 @@ bool GraphicsClass::RenderScanData()
 		worldMatrix, viewMatrix, orthoMatrix, m_AScanLine->GetColor());
 	if (!result)
 		return false;
+
+	RECT rectPos = { 00, 0,300,300 };
+	// 将二维图像顶点和索引缓存放入图形管道，准备绘制
+	result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), rectPos);
+	if (!result)
+		return false;
+	// 使用纹理着色器绘制二维图像
+	result = m_TextureShader->Render(m_Direct3D->GetDeviceContext(), m_Bitmap->GetIndexCount(), worldMatrix, viewMatrix, orthoMatrix, m_Bitmap->GetTexture());
+	if (!result)
+		return false;
+	// 绘制2D图形后，开启Z-Buffer
+
 	m_Direct3D->TurnZBufferOn();
 	return true;
 }
@@ -649,14 +668,16 @@ bool GraphicsClass::Render2D()
 
 	// 取得世界，观察和投影矩阵
 	//m_Direct3D->GetWorldMatrix(worldMatrix);
+	worldMatrix = XMMatrixIdentity();
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_Direct3D->GetOrthoMatrix(orthoMatrix);
 
 
-	// 绘制2D图形前，关闭Z-Buffer（关闭z-buffer后，后绘制的图形在前，先绘制的图形在后；而开启z-buffer，z坐标小的在前，z坐标大的在后）
-	m_Direct3D->TurnZBufferOff();
-	// 将二维图像顶点和索引缓存放入图形管道，准备绘制
-	//result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), 300, 300);
+	//// 绘制2D图形前，关闭Z-Buffer（关闭z-buffer后，后绘制的图形在前，先绘制的图形在后；而开启z-buffer，z坐标小的在前，z坐标大的在后）
+	//m_Direct3D->TurnZBufferOff();
+	//RECT rectPos = { 00, 0,300,300 };
+	//// 将二维图像顶点和索引缓存放入图形管道，准备绘制
+	//result = m_Bitmap->Render(m_Direct3D->GetDeviceContext(), rectPos);
 	//if (!result)
 	//	return false;
 	//// 使用纹理着色器绘制二维图像
@@ -732,7 +753,7 @@ bool GraphicsClass::AdjustCameraParameter()
 	curCameraRotationY += m_inputDeviceState->mouseDeltaX / 10;
 
 	// 更新相机位置和旋转角
-	m_Camera->UpdePositionFromWorldToCamera(  deltaCameraPositionX, deltaCameraPositionY, deltaCameraPositionZ);
+	m_Camera->UpdateCameraPosition(  deltaCameraPositionX, deltaCameraPositionY, deltaCameraPositionZ);
 	m_Camera->SetRotation(curCameraRotationX, curCameraRotationY, curCameraRotationZ);
 
 	// 将每一帧的相对位移量复位

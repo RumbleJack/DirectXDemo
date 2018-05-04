@@ -90,9 +90,6 @@
     <ClCompile Include="terrainclass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="zoneclass.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="applicationclass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -103,6 +100,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="zoneclass.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,9 +173,6 @@
     <ClInclude Include="terrainclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="zoneclass.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="applicationclass.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -196,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="Common\PubMacroDef.h">
       <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="zoneclass.h">
+      <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
